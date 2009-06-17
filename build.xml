@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="jintn3270" default="package" basedir=".">
 	<path id="proj.classpath">
+		<fileset dir="lib" includes="*.jar"/>
 	</path>
 	
 	<target name="javadocs">

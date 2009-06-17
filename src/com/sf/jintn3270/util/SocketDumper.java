@@ -2,6 +2,7 @@ package com.sf.jintn3270.util;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Formatter;
 
 public class SocketDumper implements Runnable {
 	String host;
@@ -24,6 +25,7 @@ public class SocketDumper implements Runnable {
 		DataInputStream istream = null;
 		DataOutputStream ostream = null;
 		FileOutputStream fos = null;
+		Formatter console = new Formatter(System.out);
 		try {
 			sock = new Socket(host, port);
 			istream = new DataInputStream(sock.getInputStream());
@@ -31,17 +33,13 @@ public class SocketDumper implements Runnable {
 			fos = new FileOutputStream(fileName);
 			
 			if (sock.isConnected()) {
-				// Not sure why I send this...
-				ostream.write((byte)0xCC);
-				ostream.flush();
-				
 				try {
 					byte b;
 					while (true) {
 						b = istream.readByte();
 						
 						fos.write(b);
-						System.out.write(b);
+						console.format("0x%02x ", b);
 					}
 				} catch (IOException io) {
 					System.out.println("" + io);
