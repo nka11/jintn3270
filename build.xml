@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="jintn3270" default="package" basedir=".">
+	<path id="proj.classpath">
+	</path>
+	
+	<target name="javadocs">
+		<javadoc packagenames="com.*"
+			sourcepath="src"
+			destdir="docs/${ant.project.name}" 
+			author="true"
+			version="true"
+			Windowtitle="${ant.project.name} API"
+		/>
+	</target>
+	
+	<target name="clean">
+		<delete dir="classes"/>
+		<delete dir="docs/${ant.project.name}"/>
+		<delete dir="dist"/>
+		<delete>
+			<fileset dir="." includes="${ant.project.name}**"/>
+			<fileset dir="." includes="*.log"/>
+		</delete>
+	</target>
+	
+	<target name="init">
+		<mkdir dir="classes"/>
+	</target>
+	
+	<target name="compile" depends="init">
+		<javac srcdir="src"
+		       destdir="classes"
+			  debug="true"
+			  source="1.5"
+			  target="1.5"
+			  classpathref="proj.classpath"
+		>
+		</javac>
+	</target>
+	
+	<target name="package" depends="compile">
+		<jar file="${ant.project.name}.jar">
+			<fileset dir="classes"/>
+<!--			<manifest>
+				<attribute name="Main-Class" value="com.moserinc.nimble.Executor"/>
+			</manifest> -->
+		</jar>
+	</target>
+	
+	<target name="dist" depends="package">
+	</target>
+	
+<!--	<target name="run-executor" depends="package">
+		<java classname="com.moserinc.nimble.Executor" fork="true" maxmemory="128m">
+			<arg value="224.1.2.3"/>
+			<arg value="2000"/>
+			<arg value="2220"/>
+			<classpath>
+				<path refid="proj.classpath"/>
+				<filelist dir="." files="${ant.project.name}.jar"/>
+			</classpath>
+		</java>
+	</target>
+-->
+</project>
