@@ -9,7 +9,7 @@ public class IAC extends TelnetCommand {
 	}
 	
 	public int getLength() {
-		return tc.getLength() + 1;
+		return subCommand.getLength() + 1;
 	}
 	
 	protected void send(ChannelBuffer buf) {
