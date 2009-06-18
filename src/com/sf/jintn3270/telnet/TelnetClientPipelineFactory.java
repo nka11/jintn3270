@@ -8,7 +8,8 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 public class TelnetClientPipelineFactory implements ChannelPipelineFactory {
 	public ChannelPipeline getPipeline() {
 		ChannelPipeline pipeline = Channels.pipeline();
-		pipeline.addLast("handler", new TelnetDecoder());
+		pipeline.addLast("handler", new TelnetFrameDecoder());
+		// TODO: Add decoder & encoder
 		return pipeline;
 	}
 }

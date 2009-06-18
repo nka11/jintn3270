@@ -19,7 +19,7 @@ import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
 import java.util.HashMap;
 import java.util.Formatter;
 
-public class TelnetDecoder extends ReplayingDecoder<TelnetState> {
+public class TelnetFrameDecoder extends ReplayingDecoder<TelnetState> {
 	byte previous = (byte)0x00;
 	byte command = (byte)0x00;
 	
@@ -29,7 +29,7 @@ public class TelnetDecoder extends ReplayingDecoder<TelnetState> {
 			new HashMap<Byte, TelnetOption>();
 	
 	
-	public TelnetDecoder() {
+	public TelnetFrameDecoder() {
 		super(TelnetState.DEFAULT);
 	}
 	

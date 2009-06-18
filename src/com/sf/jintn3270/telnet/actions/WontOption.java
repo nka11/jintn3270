@@ -20,7 +20,7 @@ public class WontOption implements TelnetAction {
 		buf.writeByte(TelnetState.IAC.toByte());
 		buf.writeByte(TelnetState.DO.toByte());
 		buf.writeByte(option.getCode());
-		
+		System.out.println("SENDING WONT");
 		ch.write(buf);
 	}
 }
