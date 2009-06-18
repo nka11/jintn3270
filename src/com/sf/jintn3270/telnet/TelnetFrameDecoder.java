@@ -1,12 +1,8 @@
 package com.sf.jintn3270.telnet;
 
-import com.sf.jintn3270.telnet.options.TelnetOption;
-import com.sf.jintn3270.telnet.options.EnabledOptions;
+
 
 public class TelnetFrameDecoder extends FrameDecoder {
-	
-	
-	
 	@Override
 	protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer) {
 		buffer.markReaderIndex();

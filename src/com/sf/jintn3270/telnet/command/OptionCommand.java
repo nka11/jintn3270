@@ -1,17 +1,27 @@
 package com.sf.jintn3270.telnet.command;
 
-enum OptionCode extends Integer {
+enum OptionCode {
 	WILL(251),
 	WONT(252),
 	DO(253),
 	DONT(254);
+	
+	private int code;
+	
+	OptionCode(int val) {
+		code = val;
+	}
+	
+	public byte getCode() {
+		return (byte)code;
+	}
 }
 
-public OptionCommand<OptionCode T> extends TelnetCommand {
+public class OptionCommand extends TelnetCommand {
 	byte arg;
 	
-	public OptionCommand<OptionCode T>(byte arg) {
-		super(T.byteValue());
+	public OptionCommand(OptionCode opt, byte arg) {
+		super(opt.getCode());
 		this.arg = arg;
 	}
 	
