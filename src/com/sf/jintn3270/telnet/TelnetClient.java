@@ -64,12 +64,14 @@ public class TelnetClient {
 	 * Invoked when we're disconnected
 	 */
 	protected void disconnected() {
+		System.out.println("Disconnected!");
 	}
 	
 	/**
 	 * Invoked when we're connected
 	 */
 	public void connected() {
+		System.out.println("Connected!");
 	}
 	
 	/**
