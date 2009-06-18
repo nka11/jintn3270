@@ -1,5 +1,8 @@
 package com.sf.jintn3270.telnet.command;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+
+
 enum OptionCode {
 	WILL(251),
 	WONT(252),
@@ -31,6 +34,6 @@ public class OptionCommand extends TelnetCommand {
 	
 	protected void send(ChannelBuffer buf) {
 		super.send(buf);
-		buf.write(arg);
+		buf.writeByte(arg);
 	}
 }

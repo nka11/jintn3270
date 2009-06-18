@@ -1,5 +1,9 @@
 package com.sf.jintn3270.telnet.command;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.channel.Channel;
+
 public abstract class TelnetCommand {
 	byte code;
 	
@@ -15,11 +19,11 @@ public abstract class TelnetCommand {
 	public abstract int getLength();
 	
 	protected void send(ChannelBuffer buf) {
-		buf.write(code);
+		buf.writeByte(code);
 	}
 	
 	public void send(Channel c) {
-		ChannelBuffer buf = Buffers.allocateDirect(getLength());
+		ChannelBuffer buf = ChannelBuffers.directBuffer(getLength());
 		
 		send(buf);
 		

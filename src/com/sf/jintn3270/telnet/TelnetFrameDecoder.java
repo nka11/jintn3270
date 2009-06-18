@@ -4,7 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.code.frame.FrameDecoder;
+import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 
 
@@ -15,9 +15,6 @@ public class TelnetFrameDecoder extends FrameDecoder {
 		buffer.markReaderIndex();
 		
 		byte b = buffer.readByte();
-		if (IAC.equals(b)) {
-			// Read the next byte.
-			b = buffer.readByte();
 			
 			
 			
@@ -26,7 +23,6 @@ public class TelnetFrameDecoder extends FrameDecoder {
 			
 			
 			
-		}
 		
 		// If we don't have an IAC, we just do something with what we're sent.
 		

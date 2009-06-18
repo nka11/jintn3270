@@ -1,5 +1,8 @@
 package com.sf.jintn3270.telnet.command;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+
+
 public class IAC extends TelnetCommand {
 	TelnetCommand subCommand;
 	
