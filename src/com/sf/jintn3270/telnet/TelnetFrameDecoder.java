@@ -54,9 +54,8 @@ public class TelnetFrameDecoder extends FrameDecoder {
 					}
 					
 					System.out.println("Decoded sub-command: " + subCommand);
-					
-					buffer.resetReaderIndex();
-					return buffer.readBytes(cmd.getLength() + subCommand.getLength());
+					subCommand.received(channel, buffer);
+					return subCommand;
 				}
 				
 				buffer.resetReaderIndex();

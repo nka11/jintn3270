@@ -22,7 +22,7 @@ public abstract class TelnetCommand {
 		buf.writeByte(code);
 	}
 	
-	public void received(ChannelBuffer buf) {
+	public void received(Channel channel, ChannelBuffer buf) {
 	}
 	
 	public void send(Channel c) {
