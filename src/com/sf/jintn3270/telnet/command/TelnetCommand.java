@@ -22,6 +22,9 @@ public abstract class TelnetCommand {
 		buf.writeByte(code);
 	}
 	
+	public void received(ChannelBuffer buf) {
+	}
+	
 	public void send(Channel c) {
 		ChannelBuffer buf = ChannelBuffers.directBuffer(getLength());
 		
