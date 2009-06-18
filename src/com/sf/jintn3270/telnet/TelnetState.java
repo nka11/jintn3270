@@ -17,5 +17,9 @@ public enum TelnetState {
 	public byte toByte() {
 		return (byte)code;
 	}
+	
+	public boolean equals(Object obj) {
+		return obj.equals(code);
+	}
 }
 
