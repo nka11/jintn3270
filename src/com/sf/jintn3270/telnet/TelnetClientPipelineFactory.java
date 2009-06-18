@@ -12,3 +12,4 @@ public class TelnetClientPipelineFactory implements ChannelPipelineFactory {
 		return pipeline;
 	}
 }
+

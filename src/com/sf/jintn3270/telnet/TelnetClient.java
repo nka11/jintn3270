@@ -31,3 +31,4 @@ public class TelnetClient {
 		client.connect(args[0], Integer.parseInt(args[1]));
 	}
 }
+
