@@ -4,6 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 
@@ -27,15 +28,17 @@ public class TelnetFrameDecoder extends FrameDecoder {
 	
 	@Override
 	protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer) {
+		System.out.println("Decode");
+		
 		buffer.markReaderIndex();
 		
 		byte b = buffer.readByte();
+		System.out.println("Read byte: " + b);
 		TelnetCommand cmd = knownCommands.get(b);
 		if (cmd != null) {
-			
-			if (cmd.getCode() == 0xff) {
+			System.out.println("Got command with code: " + cmd.getCode());
+			if (cmd.getCode() == (byte)0xff) {
 				if (buffer.readableBytes() < 1) {
-					buffer.resetReaderIndex();
 					return null;
 				}
 				
@@ -44,13 +47,16 @@ public class TelnetFrameDecoder extends FrameDecoder {
 				
 				TelnetCommand subCommand = knownCommands.get(b);
 				if (subCommand != null) {
-					if (buffer.readableBytes() < subCommand.getLength()) {
+					System.out.println("Identified Sub-Command! with code: " + subCommand.getCode());
+					if ((buffer.readableBytes() + 1) < subCommand.getLength()) {
 						buffer.resetReaderIndex();
 						return null;
 					}
 					
+					System.out.println("Decoded sub-command: " + subCommand);
+					
 					buffer.resetReaderIndex();
-					return buffer.readBytes(subCommand.getLength() + 1);
+					return buffer.readBytes(cmd.getLength() + subCommand.getLength());
 				}
 				
 				buffer.resetReaderIndex();

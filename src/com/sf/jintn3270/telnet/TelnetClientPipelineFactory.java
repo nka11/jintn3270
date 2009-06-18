@@ -19,7 +19,6 @@ public class TelnetClientPipelineFactory implements ChannelPipelineFactory {
 		commands.add(new OptionCommand(OptionCommand.OptionCode.DONT));
 		
 		pipeline.addLast("handler", new TelnetFrameDecoder((TelnetCommand[])commands.toArray(new TelnetCommand[0])));
-		// TODO: Add decoder & encoder
 		return pipeline;
 	}
 }

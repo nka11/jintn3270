@@ -19,11 +19,7 @@ public class OptionCommand extends TelnetCommand {
 	}
 	
 	public int getLength() {
-		if (noArg) {
-			return 1;
-		} else {
-			return 2;
-		}
+		return 2;
 	}
 	
 	protected void send(ChannelBuffer buf) {
