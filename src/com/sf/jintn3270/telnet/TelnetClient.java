@@ -1,52 +1,52 @@
 package com.sf.jintn3270.telnet;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.Executors;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.ChannelFuture;
+import java.io.IOException;
 
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.jboss.netty.bootstrap.ClientBootstrap;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
+import java.nio.ByteBuffer;
+
 
 /**
  * Class that implements a client. Yay.
  */
-public class TelnetClient {
-	ClientBootstrap bootstrap;
-	Channel channel;
-	ChannelFactory factory;
+public class TelnetClient implements Runnable {
+	String host;
+	int port;
+	boolean ssl;
 	
-	public TelnetClient() {
-		channel = null;
-		factory = new NioClientSocketChannelFactory(
-					Executors.newCachedThreadPool(),
-					Executors.newCachedThreadPool());
-		bootstrap = new ClientBootstrap(factory);
+	Socket sock = null;
+	
+	/**
+	 * Construct a new TelnetClient that will connect to the given host, port, and use ssl or not.
+	 */
+	public TelnetClient(String host, int port, boolean ssl) {
+		this.host = host;
+		this.port = port;
+		this.ssl = ssl;
 		
-		bootstrap.setPipelineFactory(new TelnetClientPipelineFactory());
-		
-		bootstrap.setOption("tcpNoDelay", true);
-		bootstrap.setOption("keepAlive", true);
+		sock = null;
 	}
 	
 	/**
 	 * You may want to call this from another thread...
 	 */
-	public void connect(String host, int port) {
+	void connect() throws UnknownHostException, IOException {
 		if (isConnected()) {
 			disconnect();
 		}
 		
-		ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port));
-		
-		channel = future.awaitUninterruptibly().getChannel();
-		
-		if (!future.isSuccess()) {
-			channel = null;
-			disconnected();
+		if (!ssl) {
+			sock = new Socket(host, port);
 		} else {
+			// TODO: Implement SSL socket creation.
+		}
+		
+		if (sock != null) {
+			sock.setKeepAlive(true);
 			connected();
 		}
 	}
@@ -55,8 +55,14 @@ public class TelnetClient {
 	 * Disconnects from the host.
 	 */
 	public void disconnect() {
-		channel.close().awaitUninterruptibly();
-		channel = null;
+		if (sock != null) {
+			try {
+				sock.close();
+			} catch (IOException ioe) {
+			} finally {
+				sock = null;
+			}
+		}
 		disconnected();
 	}
 	
@@ -78,15 +84,42 @@ public class TelnetClient {
 	 * Determines if we have an output channel
 	 */
 	public boolean isConnected() {
-		return channel != null;
+		return sock != null;
 	}
+	
+	/**
+	 * Start it up, baby.
+	 */
+	public void run() {
+		try {
+			connect();
+		} catch (Exception ex) {
+			disconnected();
+		}
+		
+ 		while (sock != null && !sock.isClosed()) {
+			try {
+				// Do I have data to read?
+				
+				
+				
+				// Do I have data to write?
+				
+				
+				
+			} catch (Exception ex) {
+			} 
+			// Play nice with thread schedulers.
+			Thread.yield();
+		}
+	}
+	
 	
 	/**
 	 * Oh yeah, baby.
 	 */
 	public static void main(String[] args) {
-		TelnetClient client = new TelnetClient();
-		client.connect(args[0], Integer.parseInt(args[1]));
+		TelnetClient client = new TelnetClient(args[0], Integer.parseInt(args[1]), false);
+		new Thread(client).start();
 	}
 }
-
