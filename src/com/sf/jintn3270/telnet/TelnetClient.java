@@ -3,6 +3,7 @@ package com.sf.jintn3270.telnet;
 import java.net.InetSocketAddress;
 
 import java.io.IOException;
+import java.io.BufferedInputStream;
 
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -19,6 +20,7 @@ public class TelnetClient implements Runnable {
 	boolean ssl;
 	
 	Socket sock = null;
+	BufferedInputStream inStream;
 	
 	/**
 	 * Construct a new TelnetClient that will connect to the given host, port, and use ssl or not.
@@ -47,6 +49,7 @@ public class TelnetClient implements Runnable {
 		
 		if (sock != null) {
 			sock.setKeepAlive(true);
+			inStream = new BufferedInputStream(sock.getInputStream(), sock.getReceiveBufferSize());
 			connected();
 		}
 	}
@@ -88,6 +91,23 @@ public class TelnetClient implements Runnable {
 	}
 	
 	/**
+	 * Stub for now...
+	 */
+	private boolean actionOnBytes(byte[] incomming) {
+		System.out.println("actionOnBytes(" + incomming.length + " bytes)");
+		return false;
+	}
+	
+	
+	/**
+	 * Stub for now...
+	 */
+	private byte[] outgoingBytes() {
+		return new byte[0];
+	}
+	
+	
+	/**
 	 * Start it up, baby.
 	 */
 	public void run() {
@@ -97,16 +117,32 @@ public class TelnetClient implements Runnable {
 			disconnected();
 		}
 		
+		byte[] buf;
+		int available;
  		while (sock != null && !sock.isClosed()) {
 			try {
 				// Do I have data to read?
-				
+				available = inStream.available();
+				if (available > 0) {
+					inStream.mark(available);
+					
+					buf = new byte[available];
+					inStream.read(buf);
+					
+					// If we cannot take action on the read bytes, reset the mark.
+					if (!actionOnBytes(buf)) {
+						inStream.reset();
+					}
+				}
 				
 				
 				// Do I have data to write?
-				
-				
-				
+				buf = outgoingBytes();
+				System.out.println("" + buf.length + " bytes to send");
+				if (buf.length > 0) {
+					sock.getOutputStream().write(buf);
+					sock.getOutputStream().flush();
+				}
 			} catch (Exception ex) {
 			} 
 			// Play nice with thread schedulers.
