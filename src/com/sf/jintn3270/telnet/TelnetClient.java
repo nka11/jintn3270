@@ -39,6 +39,9 @@ public class TelnetClient implements Runnable {
 	
 	
 	
+	static final byte NOP = (byte)241; // No Op!
+	static final byte DM = (byte)242; // Data Mark... data stream portion of Sync
+	
 	static final byte BRK = (byte)243; // Break
 	static final byte IP = (byte)244; // Interrupt Process
 	static final byte AO = (byte)245; // Abort Output
@@ -46,7 +49,10 @@ public class TelnetClient implements Runnable {
 	static final byte EC = (byte)247; // Erase Character
 	static final byte EL = (byte)248; // Erase Line
 	static final byte GA = (byte)249; // Go Ahead
-	static final byte SB = (byte)250; // Subnegotiation!
+	static final byte SB = (byte)250; // Start Subcommand
+	static final byte SE = (byte)240; // End Subcommand
+	
+	
 	
 	/**
 	 * Construct a new TelnetClient that will connect to the given host, port, and use ssl or not.
@@ -113,8 +119,6 @@ public class TelnetClient implements Runnable {
 		for (Option o : options) {
 			sendWill(o.getCode());
 		}
-		
-		System.out.println("Connected!");
 	}
 	
 	/**
@@ -149,7 +153,6 @@ public class TelnetClient implements Runnable {
 	 * Writes a DO option to the output buffer
 	 */
 	void sendDo(byte code) {
-		// IAC, DO, <code>
 		try {
 			outStream.write(new byte[] {IAC, DO, code});
 		} catch (IOException e) {}
@@ -159,7 +162,6 @@ public class TelnetClient implements Runnable {
 	 * Writes a WILL option to the output buffer.
 	 */
 	void sendWill(byte code) {
-		// IAC, DO, <code>
 		try {
 			outStream.write(new byte[] {IAC, WILL, code});
 		} catch (IOException e) {}
@@ -169,7 +171,6 @@ public class TelnetClient implements Runnable {
 	 * Writes a DONT option to the output buffer.
 	 */
 	void sendDont(byte code) {
-		// IAC, DONT, <code>
 		try {
 			outStream.write(new byte[] {IAC, DONT, code});
 		} catch (IOException e) {}
@@ -179,7 +180,6 @@ public class TelnetClient implements Runnable {
 	 * Writes a WONT option to the output buffer.
 	 */
 	void sendWont(byte code) {
-		// IAC, WONT, <code>
 		try {
 			outStream.write(new byte[] {IAC, WONT, code});
 		} catch (IOException e) {}
@@ -256,18 +256,34 @@ public class TelnetClient implements Runnable {
 						}
 						read = 3;
 						break;
-					case GA: // We got a GO-Ahead.
-						System.out.println("_GA_");
-						//TODO: Determine what to actually do about this.
+					case DM: // Data Mark?
+						//TODO: DataMark stuff.
+						read = 2;
+						break;
+					case NOP:
+					case BRK:
+					case IP:
+					case AO:
+					case AYT:
+					case EC: // Erase Character
 						read = 2;
 						break;
 					case EL: // Erase Line
 						read = 2;
 						break;
-					case EC: // Erase Character
+					case GA: // We got a GO-Ahead.
 						read = 2;
 						break;
-					
+					case SB: // Sub-negotiation!
+						if (incoming.length >= 5) { // Must be at least IAC, SB, <code>, IAC, SE
+							for (Option o : options) {
+								if (o.getCode() == incoming[2]) {
+									read = o.consumeIncomingBytes(incoming);
+									break;
+								}
+							}
+						}
+						break;
 					default:
 						System.out.println("UNKNOWN IAC: " + incoming[2]);
 				}
