@@ -3,6 +3,7 @@ package com.sf.jintn3270.telnet;
 import java.net.InetSocketAddress;
 
 import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.io.BufferedInputStream;
 
 import java.net.Socket;
@@ -10,6 +11,8 @@ import java.net.UnknownHostException;
 
 import java.nio.ByteBuffer;
 
+import java.util.AbstractQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Class that implements a client. Yay.
@@ -22,6 +25,17 @@ public class TelnetClient implements Runnable {
 	Socket sock = null;
 	BufferedInputStream inStream;
 	
+	ByteArrayOutputStream outStream;
+	
+	AbstractQueue<Option> options;
+	
+	private static final byte IAC = (byte)255;
+	
+	private static final byte DONT = (byte)254;
+	private static final byte DO = (byte)253;
+	private static final byte WONT = (byte)252;
+	private static final byte WILL = (byte)251;
+	
 	/**
 	 * Construct a new TelnetClient that will connect to the given host, port, and use ssl or not.
 	 */
@@ -31,6 +45,9 @@ public class TelnetClient implements Runnable {
 		this.ssl = ssl;
 		
 		sock = null;
+		
+		options = new ConcurrentLinkedQueue<Option>();
+		outStream = new ByteArrayOutputStream();
 	}
 	
 	/**
@@ -90,12 +107,138 @@ public class TelnetClient implements Runnable {
 		return sock != null;
 	}
 	
+	
+	public void addOption(Option o) {
+		options.add(o);
+		if (isConnected()) {
+			sendWill(o.getCode());
+		}
+	}
+	
+	
+	public void removeOption(Option o) {
+		if (o.isEnabled()) {
+			sendWont(o.getCode());
+		}
+	}
+	
+	
+	
+	void sendDo(byte code) {
+		// IAC, DO, <code>
+		try {
+			outStream.write(new byte[] {IAC, DO, code});
+		} catch (IOException e) {}
+	}
+	
+	void sendWill(byte code) {
+		// IAC, DO, <code>
+		try {
+			outStream.write(new byte[] {IAC, WILL, code});
+		} catch (IOException e) {}
+	}
+	
+	void sendDont(byte code) {
+		// IAC, DONT, <code>
+		try {
+			outStream.write(new byte[] {IAC, DONT, code});
+		} catch (IOException e) {}
+	}
+	
+	void sendWont(byte code) {
+		// IAC, WONT, <code>
+		try {
+			outStream.write(new byte[] {IAC, WONT, code});
+		} catch (IOException e) {}
+	}
+	
+	
+	
+	
+	
 	/**
 	 * Stub for now...
 	 */
-	private boolean actionOnBytes(byte[] incomming) {
-		System.out.println("actionOnBytes(" + incomming.length + " bytes)");
-		return false;
+	private int consumeIncomingBytes(byte[] incoming) {
+		int read = 0;
+		if (incoming[0] == IAC) {
+			if (incoming.length >= 2) {
+				switch(incoming[1]) {
+					case IAC: // Handle escaped 255.
+						// Trim the first byte.
+						System.arraycopy(incoming, 1, incoming, 0, incoming.length - 1);
+						incoming[incoming.length - 1] = (byte)0x00;
+						read = 1;
+						break;
+					case WILL: // Option Offered! Send do or don't.
+						if (incoming.length >= 3) {
+							boolean dosent = false;
+							for (Option o : options) {
+								if (o.getCode() == incoming[2]) {
+									sendDo(o.getCode());
+									dosent = true;
+									break;
+								}
+							}
+							if (!dosent) {
+								sendDont(incoming[2]);
+							}
+						}
+						read = 3;
+						break;
+					case DO: // Option requested. Send will or wont!
+						if (incoming.length >= 3) {
+							boolean enabled = false;
+							for (Option o : options) {
+								if (o.getCode() == incoming[2]) {
+									o.setEnabled(true);
+									enabled = true;
+									break;
+								}
+							}
+							if (enabled) {
+								sendWill(incoming[2]);
+							} else {
+								sendWont(incoming[2]);
+							}
+						}
+						read = 3;
+						break;
+					case DONT: // Handle disable requests.
+					case WONT:
+						if (incoming.length >= 3) {
+							for (Option o : options) {
+								if (o.getCode() == incoming[2]) {
+									o.setEnabled(false);
+								}
+							}
+						}
+						read = 3;
+						break;
+				}
+			}
+		}
+		
+		// For any enabled options, let's pass them data!
+		for (Option o : options) {
+			if (o.isEnabled()) {
+				read += o.consumeIncomingBytes(incoming);
+			}
+		}
+		
+		// Read up to an IAC, or the end of the buffer, and dump it to screen.
+		for (byte b : incoming) {
+			if (b == IAC) {
+				break;
+			}
+			read++;
+		}
+		if (incoming[0] != IAC) {
+			System.out.write(incoming, 0, read);
+		}
+		
+		System.out.println("consumeIncomingBytes(" + incoming.length + " bytes)");
+		return read;
 	}
 	
 	
@@ -103,7 +246,19 @@ public class TelnetClient implements Runnable {
 	 * Stub for now...
 	 */
 	private byte[] outgoingBytes() {
-		return new byte[0];
+		// collect all options outgoing bytes.
+		for (Option o : options) {
+			try {
+				outStream.write(o.outgoingBytes());
+			} catch (IOException ioe) {
+			}
+		}
+		
+		// append any of ours.
+		byte[] out = outStream.toByteArray();
+		outStream.reset();
+		
+		return out;
 	}
 	
 	
@@ -119,8 +274,11 @@ public class TelnetClient implements Runnable {
 		
 		byte[] buf;
 		int available;
+		int consumed;
  		while (sock != null && !sock.isClosed()) {
 			try {
+				consumed = 0;
+				
 				// Do I have data to read?
 				available = inStream.available();
 				if (available > 0) {
@@ -129,17 +287,22 @@ public class TelnetClient implements Runnable {
 					buf = new byte[available];
 					inStream.read(buf);
 					
-					// If we cannot take action on the read bytes, reset the mark.
-					if (!actionOnBytes(buf)) {
-						inStream.reset();
+					// Determine how many bytes (if any) we've successfully
+					// consumed in this pass.
+					consumed = consumeIncomingBytes(buf);
+					
+					// reset the stream mark, then skip past the consumed bytes.
+					inStream.reset();
+					if (consumed > 0) {
+						inStream.skip(consumed);
 					}
 				}
 				
 				
 				// Do I have data to write?
 				buf = outgoingBytes();
-				System.out.println("" + buf.length + " bytes to send");
 				if (buf.length > 0) {
+					System.out.println("" + buf.length + " bytes to send");
 					sock.getOutputStream().write(buf);
 					sock.getOutputStream().flush();
 				}
