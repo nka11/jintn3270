@@ -1,5 +1,8 @@
 package com.sf.jintn3270.telnet;
 
+import com.sf.jintn3270.TerminalModel;
+import com.sf.jintn3270.DefaultTerminalModel;
+
 import java.net.InetSocketAddress;
 
 import java.io.IOException;
@@ -30,6 +33,8 @@ public class TelnetClient implements Runnable {
 	
 	AbstractQueue<Option> options;
 	
+	TerminalModel model;
+	
 	public static final byte IAC = (byte)255;
 	
 	private static final byte DONT = (byte)254;
@@ -52,12 +57,16 @@ public class TelnetClient implements Runnable {
 	static final byte SB = (byte)250; // Start Subcommand
 	static final byte SE = (byte)240; // End Subcommand
 	
+	public TelnetClient(String host, int port, boolean ssl) {
+		this(host, port, ssl, new DefaultTerminalModel());
+	}
 	
 	
 	/**
 	 * Construct a new TelnetClient that will connect to the given host, port, and use ssl or not.
 	 */
-	public TelnetClient(String host, int port, boolean ssl) {
+	public TelnetClient(String host, int port, boolean ssl, TerminalModel model) {
+		this.model = model;
 		this.host = host;
 		this.port = port;
 		this.ssl = ssl;
@@ -109,7 +118,6 @@ public class TelnetClient implements Runnable {
 	 * Invoked when we're disconnected
 	 */
 	protected void disconnected() {
-		System.out.println("Disconnected!");
 	}
 	
 	/**
@@ -210,7 +218,6 @@ public class TelnetClient implements Runnable {
 						break;
 					case WILL: // Option Offered! Send do or don't.
 						if (incoming.length >= 3) {
-							System.out.println("Received WILL: " + incoming[2]);
 							boolean dosent = false;
 							for (Option o : options) {
 								if (o.getCode() == incoming[2]) {
@@ -227,7 +234,6 @@ public class TelnetClient implements Runnable {
 						break;
 					case DO: // Option requested. Send will or wont!
 						if (incoming.length >= 3) {
-							System.out.println("Received DO: " + incoming[2]);
 							boolean enabled = false;
 							for (Option o : options) {
 								if (o.getCode() == incoming[2]) {
@@ -247,7 +253,6 @@ public class TelnetClient implements Runnable {
 					case DONT: // Handle disable requests.
 					case WONT:
 						if (incoming.length >= 3) {
-							System.out.println("Received WONT/DONT: " + incoming[2]);
 							for (Option o : options) {
 								if (o.getCode() == incoming[2]) {
 									o.setEnabled(false);
@@ -257,18 +262,19 @@ public class TelnetClient implements Runnable {
 						read = 3;
 						break;
 					case DM: // Data Mark?
-						//TODO: DataMark stuff.
-						read = 2;
-						break;
 					case NOP:
 					case BRK:
 					case IP:
 					case AO:
 					case AYT:
+						read = 2;
+						break;
 					case EC: // Erase Character
+						model.eraseChar();
 						read = 2;
 						break;
 					case EL: // Erase Line
+						model.eraseLine();
 						read = 2;
 						break;
 					case GA: // We got a GO-Ahead.
@@ -307,10 +313,10 @@ public class TelnetClient implements Runnable {
 				}
 				read++;
 			}
-			System.out.write(incoming, 0, read);
+			model.print(incoming, 0, read);
+			System.out.println(model.getBuffer());
+			//System.out.write(incoming, 0, read);
 		}
-		
-		System.out.println("consumeIncomingBytes(" + incoming.length + " bytes)");
 		return read;
 	}
 	
@@ -375,7 +381,6 @@ public class TelnetClient implements Runnable {
 				// Do I have data to write?
 				buf = outgoingBytes();
 				if (buf.length > 0) {
-					System.out.println("" + buf.length + " bytes to send");
 					sock.getOutputStream().write(buf);
 					sock.getOutputStream().flush();
 				}
