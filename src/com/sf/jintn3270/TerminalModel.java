@@ -151,8 +151,10 @@ public abstract class TerminalModel {
 	}
 	
 	
+	/**
+	 * Fire the given TerminalEvent to all registered listeners
+	 */
 	protected void fire(TerminalEvent evt) {
-		// TODO: Actually fire the event!
 		Object[] listeners = listenerList.getListenerList();
 		for (int i = listeners.length - 2; i >= 0; i -= 2) {
 			if (listeners[i] == TerminalEventListener.class) {
@@ -161,6 +163,9 @@ public abstract class TerminalModel {
 		}
 	}
 	
+	/**
+	 * Create and fire a new TerminalEvent to all registered listeners
+	 */
 	protected void fire(int id, CursorPosition start, CursorPosition end) {
 		this.fire(new TerminalEvent(this, id, start, end));
 	}
