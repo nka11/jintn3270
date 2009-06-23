@@ -62,8 +62,7 @@ public class TelnetClient implements Runnable {
 		if (!ssl) {
 			sock = new Socket(host, port);
 		} else {
-			sock = new Socket();
-			sock = SSLSocketFactory.getDefault().createSocket(sock, host, port, true);
+			sock = SSLSocketFactory.getDefault().createSocket(host, port);
 		}
 		
 		if (sock != null) {
