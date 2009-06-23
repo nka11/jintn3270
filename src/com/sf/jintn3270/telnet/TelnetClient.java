@@ -30,12 +30,16 @@ public class TelnetClient implements Runnable {
 	
 	AbstractQueue<Option> options;
 	
-	private static final byte IAC = (byte)255;
+	public static final byte IAC = (byte)255;
 	
 	private static final byte DONT = (byte)254;
 	private static final byte DO = (byte)253;
 	private static final byte WONT = (byte)252;
 	private static final byte WILL = (byte)251;
+	
+	public static final byte GA = (byte)249;
+	
+	public static final byte EOR = (byte)239;
 	
 	/**
 	 * Construct a new TelnetClient that will connect to the given host, port, and use ssl or not.
@@ -48,6 +52,7 @@ public class TelnetClient implements Runnable {
 		sock = null;
 		
 		options = new ConcurrentLinkedQueue<Option>();
+		
 		outStream = new ByteArrayOutputStream();
 	}
 	
@@ -198,6 +203,7 @@ public class TelnetClient implements Runnable {
 						break;
 					case WILL: // Option Offered! Send do or don't.
 						if (incoming.length >= 3) {
+							System.out.println("Received WILL: " + incoming[2]);
 							boolean dosent = false;
 							for (Option o : options) {
 								if (o.getCode() == incoming[2]) {
@@ -214,6 +220,7 @@ public class TelnetClient implements Runnable {
 						break;
 					case DO: // Option requested. Send will or wont!
 						if (incoming.length >= 3) {
+							System.out.println("Received DO: " + incoming[2]);
 							boolean enabled = false;
 							for (Option o : options) {
 								if (o.getCode() == incoming[2]) {
@@ -233,6 +240,7 @@ public class TelnetClient implements Runnable {
 					case DONT: // Handle disable requests.
 					case WONT:
 						if (incoming.length >= 3) {
+							System.out.println("Received WONT/DONT: " + incoming[2]);
 							for (Option o : options) {
 								if (o.getCode() == incoming[2]) {
 									o.setEnabled(false);
@@ -241,6 +249,13 @@ public class TelnetClient implements Runnable {
 						}
 						read = 3;
 						break;
+					case GA: // We got a GO-Ahead.
+						System.out.println("_GA_");
+						//TODO: Determine what to actually do about this.
+						read = 2;
+						break;
+					default:
+						System.out.println("UNKNOWN IAC: " + incoming[2]);
 				}
 			}
 		}
@@ -276,9 +291,11 @@ public class TelnetClient implements Runnable {
 	private byte[] outgoingBytes() {
 		// collect all options outgoing bytes.
 		for (Option o : options) {
-			try {
-				outStream.write(o.outgoingBytes());
-			} catch (IOException ioe) {
+			if (o.isEnabled()) {
+				try {
+					outStream.write(o.outgoingBytes(outStream));
+				} catch (IOException ioe) {
+				}
 			}
 		}
 		
@@ -347,6 +364,8 @@ public class TelnetClient implements Runnable {
 	 */
 	public static void main(String[] args) {
 		TelnetClient client = new TelnetClient(args[0], Integer.parseInt(args[1]), Boolean.valueOf(args[2]).booleanValue());
+		client.addOption(new SuppressGA());
+		client.addOption(new EndOfRecord());
 		new Thread(client).start();
 	}
 }

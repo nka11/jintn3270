@@ -26,7 +26,7 @@ public abstract class Option {
 	}
 	
 	
-	public byte[] outgoingBytes() {
+	public byte[] outgoingBytes(ByteArrayOutputStream toSend) {
 		byte[] ret = out.toByteArray();
 		out.reset();
 		return ret;
@@ -39,6 +39,7 @@ public abstract class Option {
 	
 	
 	void setEnabled(boolean b) {
+		System.out.println("Option: " + getName() + " " + b);
 		enabled = b;
 	}
 }
