@@ -19,7 +19,19 @@ import java.util.AbstractQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Class that implements a client. Yay.
+ * TelnetClient is a Runnable that implements all I/O for Telnet functions.
+ * 
+ * Options can be added to the TelnetClient. Options which are successfully 
+ * negotiated with the remote host end up enabled. 
+ * 
+ * Options allow for injecting bytes to be sent, and handling bytes that have
+ * been received. Doing this allows us to create Options which maintain their
+ * own state and implement the behavior necessary for the Option to function.
+ *
+ * This class, as well as all Options implement a simple mechanism for making
+ * sure all the data necessary to carry out a task is available at the time
+ * the consumeIncommingBytes method is called. If no one consumes any bytes 
+ * (everything returns 'zero') 
  */
 public class TelnetClient implements Runnable {
 	String host;
@@ -35,13 +47,14 @@ public class TelnetClient implements Runnable {
 	
 	TerminalModel model;
 	
+	/* Constants as defined by RFC 854 */ 
+	
 	public static final byte IAC = (byte)255;
 	
 	private static final byte DONT = (byte)254;
 	private static final byte DO = (byte)253;
 	private static final byte WONT = (byte)252;
 	private static final byte WILL = (byte)251;
-	
 	
 	
 	static final byte NOP = (byte)241; // No Op!
@@ -57,13 +70,29 @@ public class TelnetClient implements Runnable {
 	static final byte SB = (byte)250; // Start Subcommand
 	static final byte SE = (byte)240; // End Subcommand
 	
+	/**
+	 * Create a TelnetClient with a DefaultTerminalModel that connects to the
+	 * given host and port, with the given ssl setting
+	 *
+	 * @param host The hostname / IP to connect to.
+	 * @param port The port to connect to (default for TELNET is 23)
+	 * @param ssl If <code>true</code> An SSLSocketFactory is used to create
+	 *        the socket. Otherwise, a normal client Socket is used.
+	 */
 	public TelnetClient(String host, int port, boolean ssl) {
 		this(host, port, ssl, new DefaultTerminalModel());
 	}
 	
 	
 	/**
-	 * Construct a new TelnetClient that will connect to the given host, port, and use ssl or not.
+	 * Create a TelnetClient that writes to the given TerminalModel,
+	 * connects to the given host and port, with the given ssl setting
+	 *
+	 * @param host The hostname / IP to connect to.
+	 * @param port The port to connect to (default for TELNET is 23)
+	 * @param ssl If <code>true</code> An SSLSocketFactory is used to create
+	 *        the socket. Otherwise, a normal client Socket is used.
+	 * @param model The TerminalModel to write incoming data to.
 	 */
 	public TelnetClient(String host, int port, boolean ssl, TerminalModel model) {
 		this.model = model;
@@ -304,9 +333,12 @@ public class TelnetClient implements Runnable {
 					read += o.consumeIncomingBytes(incoming);
 				}
 			}
-			
-			// Read up to an IAC, or the end of the incoming buffer.
-			// TODO: Pass along this data to a TerminalModel.
+		}
+		
+		// If no options handled the data, then we need to read up to the 
+		// next IAC, or the end of the buffer, and we'll treat that as 
+		// if it's data for display.
+		if (read == 0) {
 			for (byte b : incoming) {
 				if (b == IAC) {
 					break;
@@ -320,7 +352,8 @@ public class TelnetClient implements Runnable {
 	
 	
 	/**
-	 * Stub for now...
+	 * Gathers and combines all the outgoing bytes from all the enabled Options
+	 * and our own internal output buffer for writing to the socket.
 	 */
 	private byte[] outgoingBytes() {
 		// collect all options outgoing bytes.
@@ -340,7 +373,8 @@ public class TelnetClient implements Runnable {
 	
 	
 	/**
-	 * Start it up, baby.
+	 * The main I/O loop. As long as the socket is not null, and not closed, 
+	 * we continue.
 	 */
 	public void run() {
 		try {
@@ -391,7 +425,7 @@ public class TelnetClient implements Runnable {
 	
 	
 	/**
-	 * Oh yeah, baby.
+	 * Simple Test Harness
 	 */
 	public static void main(String[] args) {
 		TelnetClient client = new TelnetClient(args[0], Integer.parseInt(args[1]), Boolean.valueOf(args[2]).booleanValue());
