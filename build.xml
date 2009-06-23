@@ -4,6 +4,8 @@
 		<fileset dir="lib" includes="*.jar"/>
 	</path>
 	
+	<property file="build.properties"/>
+	
 	<target name="javadocs">
 		<javadoc packagenames="com.*"
 			sourcepath="src"
@@ -42,25 +44,23 @@
 	<target name="package" depends="compile">
 		<jar file="${ant.project.name}.jar">
 			<fileset dir="classes"/>
-<!--			<manifest>
-				<attribute name="Main-Class" value="com.moserinc.nimble.Executor"/>
-			</manifest> -->
+			<manifest>
+				<attribute name="Main-Class" value="com.sf.jintn3270.telnet.TelnetClient"/>
+			</manifest>
 		</jar>
 	</target>
 	
 	<target name="dist" depends="package">
 	</target>
 	
-<!--	<target name="run-executor" depends="package">
-		<java classname="com.moserinc.nimble.Executor" fork="true" maxmemory="128m">
-			<arg value="224.1.2.3"/>
-			<arg value="2000"/>
-			<arg value="2220"/>
+	<target name="run-telnet-test" depends="package">
+		<java classname="com.sf.jintn3270.telnet.TelnetClient" fork="true" maxmemory="128m">
+			<arg value="${test.host}"/>
+			<arg value="${test.port}"/>
 			<classpath>
 				<path refid="proj.classpath"/>
 				<filelist dir="." files="${ant.project.name}.jar"/>
 			</classpath>
 		</java>
 	</target>
--->
 </project>
