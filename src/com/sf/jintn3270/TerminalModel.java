@@ -1,6 +1,9 @@
 package com.sf.jintn3270;
 
+import javax.swing.event.EventListenerList;
+
 import com.sf.jintn3270.event.TerminalEvent;
+import com.sf.jintn3270.event.TerminalEventListener;
 
 /**
  * A TerminalModel is where telnet stream data goes to be rendered by a view.
@@ -14,6 +17,8 @@ public abstract class TerminalModel {
 	CharacterFactory charFact;
 	
 	CursorPosition cursor;
+	
+	protected EventListenerList listenerList = new EventListenerList();
 	
 	/**
 	 * Constructs a TerminalModel with the given number of rows and cols. 
@@ -41,6 +46,20 @@ public abstract class TerminalModel {
 			}
 		}
 		fire(new TerminalEvent(this, TerminalEvent.BUFFER_CHANGED));
+	}
+	
+	/**
+	 * Adds the given Listener
+	 */
+	public void addTerminalEventListener(TerminalEventListener listener) {
+		listenerList.add(TerminalEventListener.class, listener);
+	}
+	
+	/**
+	 * Removes the given Listener
+	 */
+	public void removeTerminalEventListener(TerminalEventListener listener) {
+		listenerList.remove(TerminalEventListener.class, listener);
 	}
 	
 	/**
@@ -133,7 +152,13 @@ public abstract class TerminalModel {
 	
 	
 	protected void fire(TerminalEvent evt) {
-		
+		// TODO: Actually fire the event!
+		Object[] listeners = listenerList.getListenerList();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == TerminalEventListener.class) {
+				((TerminalEventListener)listeners[i + 1]).terminalChanged(evt);
+			}
+		}
 	}
 	
 	protected void fire(int id, CursorPosition start, CursorPosition end) {
