@@ -39,8 +39,11 @@ public abstract class Option {
 	
 	
 	void setEnabled(boolean b) {
-		System.out.println("Option: " + getName() + " " + b);
 		enabled = b;
+		if (enabled) {
+			System.out.println("   ENABLED " + getName());
+		} else {
+			System.out.println("   DISABLED " + getName());
+		}
 	}
 }
-

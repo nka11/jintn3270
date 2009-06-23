@@ -37,9 +37,11 @@ public class TelnetClient implements Runnable {
 	private static final byte WONT = (byte)252;
 	private static final byte WILL = (byte)251;
 	
-	public static final byte GA = (byte)249;
+	private static final byte EC = (byte)247; // Erase Character
+	private static final byte EL = (byte)248; // Erase Line
 	
-	public static final byte EOR = (byte)239;
+	
+	public static final byte GA = (byte)249; // Go Ahead
 	
 	/**
 	 * Construct a new TelnetClient that will connect to the given host, port, and use ssl or not.

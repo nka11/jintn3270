@@ -3,11 +3,13 @@ package com.sf.jintn3270.telnet;
 import java.io.ByteArrayOutputStream;
 
 public class EndOfRecord extends Option {
+	public static final byte EOR = (byte)239; // End of Record.
+	
 	byte[] markEOR;
 	
 	public EndOfRecord() {
 		super();
-		markEOR = new byte[] {TelnetClient.IAC, TelnetClient.EOR};
+		markEOR = new byte[] {TelnetClient.IAC, EOR};
 	}
 	
 	public String getName() {
@@ -26,5 +28,12 @@ public class EndOfRecord extends Option {
 			ret = new byte[0];
 		}
 		return ret;
+	}
+	
+	public int consumeIncomingBytes(byte[] incoming) {
+		if (incoming[0] == TelnetClient.IAC && incoming[1] == EOR) {
+			return 2;
+		}
+		return 0;
 	}
 }
