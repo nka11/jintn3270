@@ -37,11 +37,16 @@ public class TelnetClient implements Runnable {
 	private static final byte WONT = (byte)252;
 	private static final byte WILL = (byte)251;
 	
-	private static final byte EC = (byte)247; // Erase Character
-	private static final byte EL = (byte)248; // Erase Line
 	
 	
-	public static final byte GA = (byte)249; // Go Ahead
+	static final byte BRK = (byte)243; // Break
+	static final byte IP = (byte)244; // Interrupt Process
+	static final byte AO = (byte)245; // Abort Output
+	static final byte AYT = (byte)246; // Are you there
+	static final byte EC = (byte)247; // Erase Character
+	static final byte EL = (byte)248; // Erase Line
+	static final byte GA = (byte)249; // Go Ahead
+	static final byte SB = (byte)250; // Subnegotiation!
 	
 	/**
 	 * Construct a new TelnetClient that will connect to the given host, port, and use ssl or not.
@@ -54,7 +59,7 @@ public class TelnetClient implements Runnable {
 		sock = null;
 		
 		options = new ConcurrentLinkedQueue<Option>();
-		
+		options.add(new SuppressGA());
 		outStream = new ByteArrayOutputStream();
 	}
 	
@@ -256,6 +261,13 @@ public class TelnetClient implements Runnable {
 						//TODO: Determine what to actually do about this.
 						read = 2;
 						break;
+					case EL: // Erase Line
+						read = 2;
+						break;
+					case EC: // Erase Character
+						read = 2;
+						break;
+					
 					default:
 						System.out.println("UNKNOWN IAC: " + incoming[2]);
 				}
@@ -293,11 +305,9 @@ public class TelnetClient implements Runnable {
 	private byte[] outgoingBytes() {
 		// collect all options outgoing bytes.
 		for (Option o : options) {
-			if (o.isEnabled()) {
-				try {
-					outStream.write(o.outgoingBytes(outStream));
-				} catch (IOException ioe) {
-				}
+			try {
+				outStream.write(o.outgoingBytes(outStream));
+			} catch (IOException ioe) {
 			}
 		}
 		
@@ -366,7 +376,6 @@ public class TelnetClient implements Runnable {
 	 */
 	public static void main(String[] args) {
 		TelnetClient client = new TelnetClient(args[0], Integer.parseInt(args[1]), Boolean.valueOf(args[2]).booleanValue());
-		client.addOption(new SuppressGA());
 		client.addOption(new EndOfRecord());
 		new Thread(client).start();
 	}

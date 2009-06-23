@@ -22,7 +22,7 @@ public class EndOfRecord extends Option {
 	
 	public byte[] outgoingBytes(ByteArrayOutputStream toSend) {
 		byte[] ret;
-		if (toSend.size() > 0) {
+		if (isEnabled() && toSend.size() > 0) {
 			ret = markEOR;
 		} else {
 			ret = new byte[0];
