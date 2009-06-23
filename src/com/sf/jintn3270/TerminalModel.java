@@ -1,5 +1,7 @@
 package com.sf.jintn3270;
 
+import com.sf.jintn3270.event.TerminalEvent;
+
 /**
  * A TerminalModel is where telnet stream data goes to be rendered by a view.
  * A model maintains a list of listeners, which are notified when changes to the 
@@ -30,13 +32,15 @@ public abstract class TerminalModel {
 	 */
 	protected void initializeBuffer(int rows, int cols) {
 		buffer = new TerminalCharacter[rows][cols];
+		cursor.row = 0;
+		cursor.column = 0;
 		byte b = 0;
 		for (int row = 0; row < buffer.length; row++) {
 			for (int col = 0; col < buffer[row].length; col++) {
 				buffer[row][col] = charFact.get(b);
 			}
 		}
-		// TODO: Fire Buffer Changed
+		fire(new TerminalEvent(this, TerminalEvent.BUFFER_CHANGED));
 	}
 	
 	/**
@@ -46,9 +50,12 @@ public abstract class TerminalModel {
 	 * This would be like a 'backspace'.
 	 */
 	public void eraseChar() {
+		CursorPosition before = (CursorPosition)cursor.clone();
+		
 		cursor.left();
 		buffer[cursor.row()][cursor.column()] = charFact.get((byte)0);
-		// TODO: Fire Buffer Changed
+		
+		fire(TerminalEvent.BUFFER_UPDATE, (CursorPosition)cursor.clone(), before);
 	}
 	
 	/**
@@ -56,11 +63,14 @@ public abstract class TerminalModel {
 	 * entire line to 0x00, then moves the cursor to column 0.
 	 */
 	public void eraseLine() {
+		CursorPosition before = (CursorPosition)cursor.clone();
+		before.column = buffer[0].length - 1;
+		
 		for (int col = 0; col < buffer[cursor.row()].length; col++) {
 			buffer[cursor.row()][col] = charFact.get((byte)0);
 		}
-		cursor.moveTo(cursor.row(), 0);
-		// TODO: Fire Buffer Changed
+		cursor.column = 0;
+		fire(TerminalEvent.BUFFER_UPDATE, (CursorPosition)cursor.clone(), before);
 	}
 	
 	/**
@@ -81,7 +91,7 @@ public abstract class TerminalModel {
 			display = false;
 		}
 		if (ch.getDisplay() == '\r') {
-			cursor.moveTo(cursor.row(), 0);
+			cursor.column = 0;
 			display = false;
 		}
 		
@@ -95,8 +105,10 @@ public abstract class TerminalModel {
 	 * Prints the given byte at the current cursor location.
 	 */
 	public void print(byte b) {
+		CursorPosition before = (CursorPosition)cursor.clone();
+		
 		print(charFact.get(b));
-		// TODO: Fire buffer changed.
+		fire(TerminalEvent.BUFFER_UPDATE, before, cursor);
 	}
 	
 	/**
@@ -104,10 +116,12 @@ public abstract class TerminalModel {
 	 * the current cursor location.
 	 */
 	public void print(byte[] bytes, int offset, int length) {
+		CursorPosition before = (CursorPosition)cursor.clone();
+		
 		for (int pos = offset; pos < (offset + length); pos++) {
 			print(charFact.get(bytes[pos]));
 		}
-		// TODO: Fire buffer changed.
+		fire(TerminalEvent.BUFFER_UPDATE, before, cursor);
 	}
 	
 	/**
@@ -115,14 +129,22 @@ public abstract class TerminalModel {
 	 */
 	public void print(byte[] bytes) {
 		print(bytes, 0, bytes.length);
-		// TODO: Fire buffer changed.
+	}
+	
+	
+	protected void fire(TerminalEvent evt) {
+		
+	}
+	
+	protected void fire(int id, CursorPosition start, CursorPosition end) {
+		this.fire(new TerminalEvent(this, id, start, end));
 	}
 	
 	
 	/**
 	 * CursorPosition is closely tied to the buffer.
 	 */
-	public class CursorPosition {
+	public class CursorPosition implements Cloneable {
 		private int row;
 		private int column;
 		
@@ -131,9 +153,18 @@ public abstract class TerminalModel {
 			this.column = 0;
 		}
 		
-		public void moveTo(int row, int column) {
+		// Copy Constructor
+		CursorPosition(int row, int column) {
 			this.row = row;
 			this.column = column;
+		}
+		
+		public void moveTo(int row, int column) {
+			CursorPosition before = new CursorPosition(row, column);
+			
+			this.row = row;
+			this.column = column;
+			fire(TerminalEvent.CURSOR_MOVED, before, this);
 		}
 		
 		public int row() {
@@ -183,6 +214,13 @@ public abstract class TerminalModel {
 			if (row > buffer.length) {
 				row = 0;
 			}
+		}
+		
+		/**
+		 * Implements cloneable.
+		 */
+		public Object clone() {
+			return new CursorPosition(row, column);
 		}
 	}
 }
