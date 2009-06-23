@@ -8,6 +8,7 @@ import java.io.BufferedInputStream;
 
 import java.net.Socket;
 import java.net.UnknownHostException;
+import javax.net.ssl.SSLSocketFactory;
 
 import java.nio.ByteBuffer;
 
@@ -61,7 +62,8 @@ public class TelnetClient implements Runnable {
 		if (!ssl) {
 			sock = new Socket(host, port);
 		} else {
-			// TODO: Implement SSL socket creation.
+			sock = new Socket();
+			sock = SSLSocketFactory.getDefault().createSocket(sock, host, port, true);
 		}
 		
 		if (sock != null) {
@@ -97,6 +99,10 @@ public class TelnetClient implements Runnable {
 	 * Invoked when we're connected
 	 */
 	public void connected() {
+		for (Option o : options) {
+			sendWill(o.getCode());
+		}
+		
 		System.out.println("Connected!");
 	}
 	
@@ -107,7 +113,9 @@ public class TelnetClient implements Runnable {
 		return sock != null;
 	}
 	
-	
+	/**
+	 * Add the option and send a WILL.
+	 */
 	public void addOption(Option o) {
 		options.add(o);
 		if (isConnected()) {
@@ -116,6 +124,9 @@ public class TelnetClient implements Runnable {
 	}
 	
 	
+	/**
+	 * Remove the option and send a WONT
+	 */
 	public void removeOption(Option o) {
 		if (o.isEnabled()) {
 			sendWont(o.getCode());
@@ -123,7 +134,9 @@ public class TelnetClient implements Runnable {
 	}
 	
 	
-	
+	/**
+	 * Writes a DO option to the output buffer
+	 */
 	void sendDo(byte code) {
 		// IAC, DO, <code>
 		try {
@@ -131,6 +144,9 @@ public class TelnetClient implements Runnable {
 		} catch (IOException e) {}
 	}
 	
+	/**
+	 * Writes a WILL option to the output buffer.
+	 */
 	void sendWill(byte code) {
 		// IAC, DO, <code>
 		try {
@@ -138,6 +154,9 @@ public class TelnetClient implements Runnable {
 		} catch (IOException e) {}
 	}
 	
+	/**
+	 * Writes a DONT option to the output buffer.
+	 */
 	void sendDont(byte code) {
 		// IAC, DONT, <code>
 		try {
@@ -145,6 +164,9 @@ public class TelnetClient implements Runnable {
 		} catch (IOException e) {}
 	}
 	
+	/**
+	 * Writes a WONT option to the output buffer.
+	 */
 	void sendWont(byte code) {
 		// IAC, WONT, <code>
 		try {
@@ -153,11 +175,17 @@ public class TelnetClient implements Runnable {
 	}
 	
 	
-	
-	
-	
 	/**
-	 * Stub for now...
+	 * The read/write loop (I/O thread) passing byte[] buffers to this method,
+	 * In this implementation, we look for IAC, and other TELNET commands to 
+	 * respond to. If we can handle the incoming data, we return the number of 
+	 * bytes we've read & handled. These bytes are then consumed by the input 
+	 * stream after this method is called. If zero bytes are consumed, the 
+	 * data is considered to be an incomplete frame, and will be re-delivered 
+	 * when more data is available.
+	 * 
+	 * @param incoming The bytes coming in from the buffer.
+	 * @return The number of bytes consumed in this pass.
 	 */
 	private int consumeIncomingBytes(byte[] incoming) {
 		int read = 0;
@@ -319,7 +347,7 @@ public class TelnetClient implements Runnable {
 	 * Oh yeah, baby.
 	 */
 	public static void main(String[] args) {
-		TelnetClient client = new TelnetClient(args[0], Integer.parseInt(args[1]), false);
+		TelnetClient client = new TelnetClient(args[0], Integer.parseInt(args[1]), Boolean.valueOf(args[2]).booleanValue());
 		new Thread(client).start();
 	}
 }

@@ -57,6 +57,7 @@
 		<java classname="com.sf.jintn3270.telnet.TelnetClient" fork="true" maxmemory="128m">
 			<arg value="${test.host}"/>
 			<arg value="${test.port}"/>
+			<arg value="${test.ssl}"/>
 			<classpath>
 				<path refid="proj.classpath"/>
 				<filelist dir="." files="${ant.project.name}.jar"/>
