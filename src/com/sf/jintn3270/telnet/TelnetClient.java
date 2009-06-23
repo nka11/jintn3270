@@ -164,11 +164,10 @@ public class TelnetClient implements Runnable {
 		if (incoming[0] == IAC) {
 			if (incoming.length >= 2) {
 				switch(incoming[1]) {
-					case IAC: // Handle escaped 255.
+					case IAC: // Handle escaped 255. we leave 'read' at 0 so this will be passed along.
 						// Trim the first byte.
 						System.arraycopy(incoming, 1, incoming, 0, incoming.length - 1);
 						incoming[incoming.length - 1] = (byte)0x00;
-						read = 1;
 						break;
 					case WILL: // Option Offered! Send do or don't.
 						if (incoming.length >= 3) {
@@ -219,21 +218,23 @@ public class TelnetClient implements Runnable {
 			}
 		}
 		
-		// For any enabled options, let's pass them data!
-		for (Option o : options) {
-			if (o.isEnabled()) {
-				read += o.consumeIncomingBytes(incoming);
+		// If we didn't handle anything, we need to find something that can.
+		if (read == 0) {
+			// For any enabled options, let's try them.
+			for (Option o : options) {
+				if (o.isEnabled()) {
+					read += o.consumeIncomingBytes(incoming);
+				}
 			}
-		}
-		
-		// Read up to an IAC, or the end of the buffer, and dump it to screen.
-		for (byte b : incoming) {
-			if (b == IAC) {
-				break;
+			
+			// Read up to an IAC, or the end of the incoming buffer.
+			// TODO: Pass along this data to a TerminalModel.
+			for (byte b : incoming) {
+				if (b == IAC) {
+					break;
+				}
+				read++;
 			}
-			read++;
-		}
-		if (incoming[0] != IAC) {
 			System.out.write(incoming, 0, read);
 		}
 		
