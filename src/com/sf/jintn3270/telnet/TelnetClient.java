@@ -314,8 +314,6 @@ public class TelnetClient implements Runnable {
 				read++;
 			}
 			model.print(incoming, 0, read);
-			System.out.println(model.getBuffer());
-			//System.out.write(incoming, 0, read);
 		}
 		return read;
 	}
