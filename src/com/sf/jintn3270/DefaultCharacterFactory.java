@@ -7,6 +7,7 @@ public class DefaultCharacterFactory implements CharacterFactory {
 		for (int i = 0; i < chars.length; i++) {
 			chars[i] = new DefaultTerminalCharacter(i);
 		}
+		chars[0] = new DefaultTerminalCharacter(0, ' ');
 	}
 	
 	public TerminalCharacter get(byte code) {
@@ -23,6 +24,10 @@ public class DefaultCharacterFactory implements CharacterFactory {
 	class DefaultTerminalCharacter extends TerminalCharacter {
 		DefaultTerminalCharacter(int code) {
 			super((byte)code, (char)code);
+		}
+		
+		DefaultTerminalCharacter(int code, char c) {
+			super((byte)code, c);
 		}
 	}
 }

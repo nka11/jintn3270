@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * the consumeIncommingBytes method is called. If no one consumes any bytes 
  * (everything returns 'zero') 
  */
-public class TelnetClient implements Runnable {
+public class TelnetClient extends Thread {
 	String host;
 	int port;
 	boolean ssl;
@@ -107,6 +107,11 @@ public class TelnetClient implements Runnable {
 		outStream = new ByteArrayOutputStream();
 	}
 	
+	
+	public TerminalModel getTerminalModel() {
+		return model;
+	}
+	
 	/**
 	 * You may want to call this from another thread...
 	 */
@@ -141,6 +146,18 @@ public class TelnetClient implements Runnable {
 			}
 		}
 		disconnected();
+	}
+	
+	public String getHost() {
+		return host;
+	}
+	
+	public int getPort() {
+		return port;
+	}
+	
+	public boolean useSSL() {
+		return ssl;
 	}
 	
 	/**
@@ -430,6 +447,6 @@ public class TelnetClient implements Runnable {
 	public static void main(String[] args) {
 		TelnetClient client = new TelnetClient(args[0], Integer.parseInt(args[1]), Boolean.valueOf(args[2]).booleanValue());
 		client.addOption(new EndOfRecord());
-		new Thread(client).start();
+		client.start();
 	}
 }

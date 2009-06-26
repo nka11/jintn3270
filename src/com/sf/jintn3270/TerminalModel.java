@@ -163,11 +163,36 @@ public abstract class TerminalModel {
 		}
 	}
 	
+	
 	/**
 	 * Create and fire a new TerminalEvent to all registered listeners
 	 */
 	protected void fire(int id, CursorPosition start, CursorPosition end) {
 		this.fire(new TerminalEvent(this, id, start, end));
+	}
+	
+	
+	/**
+	 * Returns the height (number of rows) in the buffer
+	 */
+	public int getBufferHeight() {
+		return buffer.length;
+	}
+	
+	
+	/**
+	 * Returns the width (number of columns) in the buffer
+	 */
+	public int getBufferWidth() {
+		return buffer[0].length;
+	}
+	
+	
+	/**
+	 * Gets the given char at the given location in the buffer.
+	 */
+	public TerminalCharacter getChar(int row, int col) {
+		return buffer[row][col];
 	}
 	
 	
