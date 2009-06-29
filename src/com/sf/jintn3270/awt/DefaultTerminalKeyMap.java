@@ -17,6 +17,10 @@ public class DefaultTerminalKeyMap implements TerminalKeyMap {
 		for (int i = 32; i <= 126; i++) {
 			mapCharacter((char)i);
 		}
+		
+		map.put(AWTKeyStroke.getAWTKeyStroke(KeyEvent.VK_BACK_SPACE, 0), new BackspaceTerminalAction());
+		map.put(AWTKeyStroke.getAWTKeyStroke(KeyEvent.VK_ENTER, 0), new EnterTerminalAction());
+		
 	}
 	
 	private void mapCharacter(char c) {

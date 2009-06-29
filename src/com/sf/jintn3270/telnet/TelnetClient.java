@@ -57,18 +57,18 @@ public class TelnetClient extends Thread {
 	private static final byte WILL = (byte)251;
 	
 	
-	static final byte NOP = (byte)241; // No Op!
-	static final byte DM = (byte)242; // Data Mark... data stream portion of Sync
+	public static final byte NOP = (byte)241; // No Op!
+	public static final byte DM = (byte)242; // Data Mark... data stream portion of Sync
 	
-	static final byte BRK = (byte)243; // Break
-	static final byte IP = (byte)244; // Interrupt Process
-	static final byte AO = (byte)245; // Abort Output
-	static final byte AYT = (byte)246; // Are you there
-	static final byte EC = (byte)247; // Erase Character
-	static final byte EL = (byte)248; // Erase Line
-	static final byte GA = (byte)249; // Go Ahead
-	static final byte SB = (byte)250; // Start Subcommand
-	static final byte SE = (byte)240; // End Subcommand
+	public static final byte BRK = (byte)243; // Break
+	public static final byte IP = (byte)244; // Interrupt Process
+	public static final byte AO = (byte)245; // Abort Output
+	public static final byte AYT = (byte)246; // Are you there
+	public static final byte EC = (byte)247; // Erase Character
+	public static final byte EL = (byte)248; // Erase Line
+	public static final byte GA = (byte)249; // Go Ahead
+	public static final byte SB = (byte)250; // Start Subcommand
+	public static final byte SE = (byte)240; // End Subcommand
 	
 	/**
 	 * Create a TelnetClient with a DefaultTerminalModel that connects to the
@@ -225,6 +225,26 @@ public class TelnetClient extends Thread {
 		for (byte b : bytes) {
 			send(b);
 		}
+	}
+	
+	
+	/**
+	 * Sends the outgoing byte preceeded by an IAC marker
+	 */
+	public void sendCommand(byte b) {
+		sendCommand(new byte[] {b});
+	}
+	
+	/**
+	 * Sends the outgoing bytes preceeded by an IAC marker.
+	 */
+	public void sendCommand(byte[] commandBytes) {
+		byte[] toSend = new byte[commandBytes.length + 1];
+		toSend[0] = IAC;
+		System.arraycopy(commandBytes, 0, toSend, 1, commandBytes.length);
+		try {
+			outStream.write(toSend);
+		} catch (IOException e) {} ;
 	}
 	
 	/**

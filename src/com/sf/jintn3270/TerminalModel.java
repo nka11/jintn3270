@@ -59,6 +59,11 @@ public abstract class TerminalModel {
 	}
 	
 	
+	public TelnetClient getClient() {
+		return this.client;
+	}
+	
+	
 	/**
 	 * Adds the given Listener
 	 */
