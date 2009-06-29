@@ -37,6 +37,10 @@ public class DefaultTerminalRenderer extends Component implements TerminalRender
 		stretchFont = true;
 	}
 	
+	
+	/**
+	 * Paint the component to the given Graphics context!
+	 */
 	public void paint(Graphics g, TerminalModel m) {
 		Graphics2D g2d = (Graphics2D)g;
 		g2d.setFont(calculateFont(g2d, m));
@@ -68,6 +72,9 @@ public class DefaultTerminalRenderer extends Component implements TerminalRender
 		g2d.fill(cursorRect);
 	}
 	
+	/**
+	 * Implements TerminalRenderer
+	 */
 	public Dimension getPreferredSize(TerminalModel m) {
 		if (m == null) {
 			return new Dimension(200, 150);
@@ -76,6 +83,9 @@ public class DefaultTerminalRenderer extends Component implements TerminalRender
 		}
 	}
 	
+	/**
+	 * Implements TerminalRenderer.
+	 */
 	public Dimension getMinimumSize(TerminalModel m) {
 		if (m == null) {
 			return new Dimension(200, 150);
@@ -84,9 +94,19 @@ public class DefaultTerminalRenderer extends Component implements TerminalRender
 		}
 	}
 	
-	
+	/**
+	 * Calculate the ideal Font based on the current scaling policy, the 
+	 * graphics context to render to, and the the TerminalModel to render.
+	 *
+	 * @param g2d The Graphics object we're about to render into.
+	 * @param m The TerminalModel to render.
+	 * @return the Font to use when doing the rendering.
+	 */
 	protected Font calculateFont(Graphics2D g2d, TerminalModel m) {
+		// Fall back to the currently set font on this Component.
 		Font ret = getFont();
+		
+		// If we have a clip && we're supposed to modify the font...
 		Rectangle bounds = g2d.getClipBounds();
 		if (bounds != null && (scaleFont || stretchFont)) {
 			// Given the height / width of the buffer, set the font size.
@@ -94,6 +114,7 @@ public class DefaultTerminalRenderer extends Component implements TerminalRender
 					new Rectangle2D.Double(0d, 0d, 
 							(bounds.getWidth() / m.getBufferWidth()) - 1,
 							(bounds.getHeight() / m.getBufferHeight()));
+			// Derive a scaled font instance
 			if (scaleFont) {
 				Font reference = Font.decode(getFont().getFontName() + "-" + getStyle(getFont()) + "-12").deriveFont(new AffineTransform());
 				
@@ -105,6 +126,7 @@ public class DefaultTerminalRenderer extends Component implements TerminalRender
 				ret = reference.deriveFont(targetPt);
 			}
 			
+			// Derive a stretched font instance.
 			if (stretchFont) {
 				double scaley = idealCharSize.getHeight() / g2d.getFontMetrics(ret).getLineMetrics("Mq", g2d).getHeight();
 				AffineTransform scaleTransform = new AffineTransform();
@@ -116,6 +138,10 @@ public class DefaultTerminalRenderer extends Component implements TerminalRender
 	}
 	
 	
+	/**
+	 * Used to derive fonts by font-name so that we scale from a set 
+	 * starting point rather than scaling already scaled fonts.
+	 */
 	private String getStyle(Font f) {
 		if (f.getStyle() == Font.PLAIN) {
 			return "plain";
