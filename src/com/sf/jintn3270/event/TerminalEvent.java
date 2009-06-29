@@ -5,9 +5,9 @@ import java.util.EventObject;
 import com.sf.jintn3270.TerminalModel;
 
 public class TerminalEvent extends EventObject {
-	public static int BUFFER_CHANGED;
-	public static int BUFFER_UPDATE;
-	public static int CURSOR_MOVED;
+	public static final int BUFFER_CHANGED = 0;
+	public static final int BUFFER_UPDATE = 1;
+	public static final int CURSOR_MOVED = 2;
 	
 	TerminalModel.CursorPosition start;
 	TerminalModel.CursorPosition end;

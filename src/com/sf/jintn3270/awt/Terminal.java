@@ -6,7 +6,12 @@ import java.awt.Image;
 import java.awt.Panel;
 import java.awt.Graphics;
 
+import java.awt.AWTEvent;
+import java.awt.AWTKeyStroke;
+import java.awt.event.KeyEvent;
+
 import com.sf.jintn3270.event.*;
+import com.sf.jintn3270.actions.TerminalAction;
 import com.sf.jintn3270.TerminalModel;
 
 public class Terminal extends Panel implements TerminalEventListener {
@@ -15,19 +20,22 @@ public class Terminal extends Panel implements TerminalEventListener {
 	
 	TerminalModel model;
 	
-	
-	public Terminal() {
-		this(new DefaultTerminalRenderer(), null);
-	}
+	TerminalKeyMap keyMap;
 	
 	public Terminal(TerminalModel tm) {
-		this(new DefaultTerminalRenderer(), tm);
+		this(tm, new DefaultTerminalKeyMap());
 	}
 	
-	public Terminal(TerminalRenderer rn, TerminalModel tm) {
+	public Terminal(TerminalModel tm, TerminalKeyMap km) {
+		this(tm, new DefaultTerminalRenderer(), km);
+	}
+	
+	public Terminal(TerminalModel tm, TerminalRenderer rn, TerminalKeyMap km) {
 		super();
+		enableEvents(AWTEvent.KEY_EVENT_MASK);
 		setTerminalRenderer(rn);
 		setTerminalModel(tm);
+		setKeyMap(km);
 	}
 	
 	
@@ -44,6 +52,11 @@ public class Terminal extends Panel implements TerminalEventListener {
 	
 	public void setTerminalRenderer(TerminalRenderer rend) {
 		this.renderer = rend;
+	}
+	
+	
+	public void setKeyMap(TerminalKeyMap km) {
+		this.keyMap = km;
 	}
 	
 	
@@ -75,6 +88,33 @@ public class Terminal extends Panel implements TerminalEventListener {
 	
 	public Dimension getMinimumSize() {
 		return renderer.getMinimumSize(model);
+	}
+	
+	protected void processKeyEvent(KeyEvent e) {
+		AWTKeyStroke stroke = AWTKeyStroke.getAWTKeyStrokeForEvent(e);
+		if (keyMap != null) {
+			TerminalAction action = keyMap.getAction(stroke);
+			if (action != null) {
+				e.consume();
+				try {
+					action.doAction(model);
+				} catch (Exception ex) {}
+			}
+		}
+		
+		if (!e.isConsumed()) {
+			TerminalAction action = keyMap.getAction(e, model);
+			if (action != null) {
+				e.consume();
+				try {
+					action.doAction(model);
+				} catch (Exception ex) {}
+			}
+		}
+		
+		if (!e.isConsumed()) {
+			keyMap.processKeyEvent(e);
+		}
 	}
 	
 	

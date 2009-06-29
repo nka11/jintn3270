@@ -170,6 +170,7 @@ public class TelnetClient extends Thread {
 	 * Invoked when we're connected
 	 */
 	public void connected() {
+		this.model.setClient(this);
 		for (Option o : options) {
 			sendWill(o.getCode());
 		}
@@ -202,6 +203,29 @@ public class TelnetClient extends Thread {
 		}
 	}
 	
+	/**
+	 * Send the given byte to the remote host.
+	 */
+	public void send(byte b) {
+		try {
+			// If we're using send to send 255, we need to escape it.
+			if (b == IAC) {
+				outStream.write(new byte[] {IAC, IAC});
+			} else {
+				outStream.write(b);
+			}
+		} catch (IOException e) {}
+	}
+	
+	/**
+	 * Send the outgoing non-command bytes
+	 */
+	public void send(byte[] bytes) {
+		// Look for 255 in the stream
+		for (byte b : bytes) {
+			send(b);
+		}
+	}
 	
 	/**
 	 * Writes a DO option to the output buffer

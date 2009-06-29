@@ -14,6 +14,10 @@ public class DefaultCharacterFactory implements CharacterFactory {
 		return get((int)code);
 	}
 	
+	public TerminalCharacter get(char c) {
+		return get((byte)c);
+	}
+	
 	public TerminalCharacter get(int code) {
 		if (code < 0) {
 			code += 256;

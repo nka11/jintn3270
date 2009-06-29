@@ -5,6 +5,8 @@ import javax.swing.event.EventListenerList;
 import com.sf.jintn3270.event.TerminalEvent;
 import com.sf.jintn3270.event.TerminalEventListener;
 
+import com.sf.jintn3270.telnet.TelnetClient;
+
 /**
  * A TerminalModel is where telnet stream data goes to be rendered by a view.
  * A model maintains a list of listeners, which are notified when changes to the 
@@ -18,6 +20,7 @@ public abstract class TerminalModel {
 	
 	CursorPosition cursor;
 	
+	TelnetClient client;
 	
 	protected EventListenerList listenerList = new EventListenerList();
 	
@@ -28,7 +31,8 @@ public abstract class TerminalModel {
 	 */
 	protected TerminalModel(int rows, int cols, CharacterFactory charFact) {
 		this.charFact = charFact;
-		cursor = new CursorPosition();
+		this.cursor = new CursorPosition();
+		this.client = null;
 		initializeBuffer(rows, cols);
 	}
 	
@@ -49,6 +53,12 @@ public abstract class TerminalModel {
 		fire(new TerminalEvent(this, TerminalEvent.BUFFER_CHANGED));
 	}
 	
+	
+	public void setClient(TelnetClient client) {
+		this.client = client;
+	}
+	
+	
 	/**
 	 * Adds the given Listener
 	 */
@@ -61,6 +71,23 @@ public abstract class TerminalModel {
 	 */
 	public void removeTerminalEventListener(TerminalEventListener listener) {
 		listenerList.remove(TerminalEventListener.class, listener);
+	}
+	
+	/**
+	 * Type a character into the local buffer, and send it to the TelnetClient
+	 * for transmission
+	 */
+	public void type(char c) {
+		CursorPosition before = (CursorPosition)cursor.clone();
+		
+		buffer[cursor.row()][cursor.column()] = charFact.get(c);
+		if (client != null) {
+			client.send(buffer[cursor.row()][cursor.column()].getCode());
+		}
+		cursor.right();
+		
+		
+		fire(TerminalEvent.BUFFER_CHANGED, (CursorPosition)cursor.clone(), before);
 	}
 	
 	/**
