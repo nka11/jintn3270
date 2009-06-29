@@ -32,7 +32,7 @@ public class EndOfRecord extends Option {
 		return ret;
 	}
 	
-	public int consumeIncomingBytes(byte[] incoming, TerminalModel model) {
+	public int consumeIncomingBytes(byte[] incoming, TelnetClient client) {
 		if (incoming[0] == TelnetClient.IAC && incoming[1] == EOR) {
 			return 2;
 		}

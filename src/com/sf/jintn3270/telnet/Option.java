@@ -2,8 +2,6 @@ package com.sf.jintn3270.telnet;
 
 import java.io.ByteArrayOutputStream;
 
-import com.sf.jintn3270.TerminalModel;
-
 public abstract class Option {
 	protected ByteArrayOutputStream out;
 	
@@ -22,7 +20,7 @@ public abstract class Option {
 	
 	
 	
-	public int consumeIncomingBytes(byte[] incoming, TerminalModel model) {
+	public int consumeIncomingBytes(byte[] incoming, TelnetClient client) {
 		return 0;
 	}
 	
