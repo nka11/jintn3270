@@ -18,6 +18,7 @@ public abstract class TerminalModel {
 	
 	CursorPosition cursor;
 	
+	
 	protected EventListenerList listenerList = new EventListenerList();
 	
 	/**
@@ -92,12 +93,18 @@ public abstract class TerminalModel {
 		fire(TerminalEvent.BUFFER_UPDATE, (CursorPosition)cursor.clone(), before);
 	}
 	
+	
 	/**
-	 * Gets the current CursorPosition used by this TerminalModel.
+	 * Obtains the CursorPosition object used by this TerminalModel.
+	 * 
+	 * Using this object, you can modify the cursor location.
+	 *
+	 * @return The CursorPosition used by this terminal.
 	 */
-	public CursorPosition getCursor() {
+	public CursorPosition cursor() {
 		return cursor;
 	}
+	
 	
 	/**
 	 * Method that sets the buffer data at the current cursor position, then
