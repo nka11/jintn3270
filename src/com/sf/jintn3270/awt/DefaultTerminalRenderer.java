@@ -22,6 +22,9 @@ public class DefaultTerminalRenderer extends Component implements TerminalRender
 	FontRenderContext fontContext;
 	RenderingHints renderHints;
 	
+	boolean scaleFont;
+	boolean stretchFont;
+	
 	public DefaultTerminalRenderer() {
 		super();
 		setFont(Font.decode("Monospaced-12"));
@@ -30,32 +33,39 @@ public class DefaultTerminalRenderer extends Component implements TerminalRender
 		                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		renderHints.put(RenderingHints.KEY_TEXT_ANTIALIASING,
 		                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		scaleFont = true;
+		stretchFont = true;
 	}
 	
 	public void paint(Graphics g, TerminalModel m) {
 		Graphics2D g2d = (Graphics2D)g;
-		g2d.setFont(getFont());
+		g2d.setFont(calculateFont(g2d, m));
 		g2d.setRenderingHints(renderHints);
-		if (!g2d.getFontRenderContext().equals(fontContext)) {
-			fontContext = g2d.getFontRenderContext();
-		}
-		Rectangle2D charBound = getFont().getStringBounds("M", fontContext);
-		LineMetrics lineMetrics = getFont().getLineMetrics("Mq", fontContext);
+		Rectangle2D charBound = g2d.getFontMetrics().getStringBounds("M", g2d);
+		LineMetrics lineMetrics = g2d.getFontMetrics().getLineMetrics("Mq", g2d);
 		
 		g2d.setBackground(Color.BLACK);
 		g2d.setColor(Color.WHITE);
 		g2d.clearRect(0, 0, g2d.getClipBounds().width, g2d.getClipBounds().height);
 		
-		Point2D.Float p = new Point2D.Float();
+		Point2D p = new Point2D.Float();
 		for (int line = 0; line < m.getBufferHeight(); line++) {
 			// TODO: Use AttributedCharacterIterator to read/render the column.
 			for (int col = 0; col < m.getBufferWidth(); col++) {
 				p.setLocation(col * (charBound.getWidth() + 1),
 				              (lineMetrics.getAscent() * (line + 1)) + 
 					(line * (lineMetrics.getDescent() + lineMetrics.getLeading())));
+				
 				g2d.drawString("" + m.getChar(line, col).getDisplay(), (float)p.getX(), (float)p.getY());
 			}
 		}
+		
+		// Draw an underscore cursor
+		p.setLocation(m.cursor().column() * (charBound.getWidth() + 1),
+				(lineMetrics.getAscent() * (m.cursor().row() + 1)) + 
+				(m.cursor().row() * (lineMetrics.getDescent() + lineMetrics.getLeading())));
+		Rectangle2D cursorRect = new Rectangle2D.Double(p.getX(), p.getY(), charBound.getWidth(), 2);
+		g2d.fill(cursorRect);
 	}
 	
 	public Dimension getPreferredSize(TerminalModel m) {
@@ -71,6 +81,50 @@ public class DefaultTerminalRenderer extends Component implements TerminalRender
 			return new Dimension(200, 150);
 		} else {
 			return getBufferSize(m, getFont().deriveFont(6.0f));
+		}
+	}
+	
+	
+	protected Font calculateFont(Graphics2D g2d, TerminalModel m) {
+		Font ret = getFont();
+		Rectangle bounds = g2d.getClipBounds();
+		if (bounds != null && (scaleFont || stretchFont)) {
+			// Given the height / width of the buffer, set the font size.
+			Rectangle2D.Double idealCharSize = 
+					new Rectangle2D.Double(0d, 0d, 
+							(bounds.getWidth() / m.getBufferWidth()) - 1,
+							(bounds.getHeight() / m.getBufferHeight()));
+			if (scaleFont) {
+				Font reference = Font.decode(getFont().getFontName() + "-" + getStyle(getFont()) + "-12").deriveFont(new AffineTransform());
+				
+				
+				Rectangle2D charSize = g2d.getFontMetrics(reference).getStringBounds("M", g2d);
+				
+				float targetPt = (float)(idealCharSize.getWidth() / charSize.getWidth());
+				targetPt = (float)Math.round(targetPt * reference.getSize2D() * 10) / 10.0f;
+				ret = reference.deriveFont(targetPt);
+			}
+			
+			if (stretchFont) {
+				double scaley = idealCharSize.getHeight() / g2d.getFontMetrics(ret).getLineMetrics("Mq", g2d).getHeight();
+				AffineTransform scaleTransform = new AffineTransform();
+				scaleTransform.setToScale(1.0, scaley);
+				ret = ret.deriveFont(scaleTransform);
+			}
+		}
+		return ret;
+	}
+	
+	
+	private String getStyle(Font f) {
+		if (f.getStyle() == Font.PLAIN) {
+			return "plain";
+		} else if (f.getStyle() == Font.BOLD) {
+			return "bold";
+		} else if (f.getStyle() == Font.ITALIC) {
+			return "italic";
+		} else {
+			return "bolditalic";
 		}
 	}
 	
