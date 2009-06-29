@@ -64,4 +64,16 @@
 			</classpath>
 		</java>
 	</target>
+	
+	<target name="run-awt-test" depends="package">
+		<java classname="com.sf.jintn3270.awt.TelnetFrame" fork="true" maxmemory="128m">
+			<arg value="${test.host}"/>
+			<arg value="${test.port}"/>
+			<arg value="${test.ssl}"/>
+			<classpath>
+				<path refid="proj.classpath"/>
+				<filelist dir="." files="${ant.project.name}.jar"/>
+			</classpath>
+		</java>
+	</target>
 </project>
