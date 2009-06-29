@@ -374,7 +374,7 @@ public class TelnetClient extends Thread {
 						if (incoming.length >= 5) { // Must be at least IAC, SB, <code>, IAC, SE
 							for (Option o : options) {
 								if (o.getCode() == incoming[2]) {
-									read = o.consumeIncomingBytes(incoming);
+									read = o.consumeIncomingBytes(incoming, model);
 									break;
 								}
 							}
@@ -391,7 +391,7 @@ public class TelnetClient extends Thread {
 			// For any enabled options, let's try them.
 			for (Option o : options) {
 				if (o.isEnabled()) {
-					read += o.consumeIncomingBytes(incoming);
+					read += o.consumeIncomingBytes(incoming, model);
 				}
 			}
 		}

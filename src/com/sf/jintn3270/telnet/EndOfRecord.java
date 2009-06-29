@@ -2,6 +2,8 @@ package com.sf.jintn3270.telnet;
 
 import java.io.ByteArrayOutputStream;
 
+import com.sf.jintn3270.TerminalModel;
+
 public class EndOfRecord extends Option {
 	public static final byte EOR = (byte)239; // End of Record.
 	
@@ -30,7 +32,7 @@ public class EndOfRecord extends Option {
 		return ret;
 	}
 	
-	public int consumeIncomingBytes(byte[] incoming) {
+	public int consumeIncomingBytes(byte[] incoming, TerminalModel model) {
 		if (incoming[0] == TelnetClient.IAC && incoming[1] == EOR) {
 			return 2;
 		}
