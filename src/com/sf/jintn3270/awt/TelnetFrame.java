@@ -17,7 +17,9 @@ public class TelnetFrame extends Frame {
 	public TelnetFrame(TelnetClient tc) {
 		super(tc.getHost() + ":" + tc.getPort());
 		this.client = tc;
+		
 		term = new Terminal(tc.getTerminalModel());
+		term.setFont(Font.decode("Lucida Console-12"));
 		
 		this.setLayout(new BorderLayout());
 		this.add(term);

@@ -85,6 +85,7 @@ public abstract class TerminalModel {
 	public void type(char c) {
 		CursorPosition before = (CursorPosition)cursor.clone();
 		
+		// TODO: IF localecho!
 		buffer[cursor.row()][cursor.column()] = charFact.get(c);
 		if (client != null) {
 			client.send(buffer[cursor.row()][cursor.column()].getCode());

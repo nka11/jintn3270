@@ -1,6 +1,7 @@
 package com.sf.jintn3270.awt;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 
 import com.sf.jintn3270.TerminalModel;
@@ -10,6 +11,8 @@ import com.sf.jintn3270.TerminalModel;
  */
 public interface TerminalRenderer {
 	public void paint(Graphics g, TerminalModel m);
+	
+	public void setFont(Font f);
 	
 	public Dimension getPreferredSize(TerminalModel m);
 	

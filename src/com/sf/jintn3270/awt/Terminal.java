@@ -2,9 +2,10 @@ package com.sf.jintn3270.awt;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Panel;
-import java.awt.Graphics;
 
 import java.awt.AWTEvent;
 import java.awt.AWTKeyStroke;
@@ -137,5 +138,10 @@ public class Terminal extends Panel implements TerminalEventListener {
 	
 	public void update(Graphics g) {
 		paint(g);
+	}
+	
+	public void setFont(Font f) {
+		super.setFont(f);
+		renderer.setFont(f);
 	}
 }
