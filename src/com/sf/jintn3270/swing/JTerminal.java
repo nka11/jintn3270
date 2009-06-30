@@ -24,15 +24,15 @@ public class JTerminal extends JPanel implements TerminalEventListener {
 	
 	TerminalKeyMap keyMap;
 	
-	public Terminal(TerminalModel tm) {
+	public JTerminal(TerminalModel tm) {
 		this(tm, new DefaultTerminalKeyMap());
 	}
 	
-	public Terminal(TerminalModel tm, TerminalKeyMap km) {
+	public JTerminal(TerminalModel tm, TerminalKeyMap km) {
 		this(tm, new DefaultTerminalRenderer(), km);
 	}
 	
-	public Terminal(TerminalModel tm, TerminalRenderer rn, TerminalKeyMap km) {
+	public JTerminal(TerminalModel tm, TerminalRenderer rn, TerminalKeyMap km) {
 		super();
 		setTerminalRenderer(rn);
 		setTerminalModel(tm);
