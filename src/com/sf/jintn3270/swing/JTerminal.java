@@ -34,6 +34,7 @@ public class JTerminal extends JPanel implements TerminalEventListener {
 	
 	public JTerminal(TerminalModel tm, TerminalRenderer rn, TerminalKeyMap km) {
 		super();
+		setFocusable(true);
 		setTerminalRenderer(rn);
 		setTerminalModel(tm);
 		setKeyMap(km);
