@@ -125,7 +125,7 @@ public class JTerminal extends JPanel implements TerminalEventListener {
 	}
 	
 	
-	public void paint(Graphics g) {
+	public void paintComponent(Graphics g) {
 		if (offscreen == null) {
 			offscreen = createImage(getSize().width, getSize().height);
 		}
@@ -134,7 +134,7 @@ public class JTerminal extends JPanel implements TerminalEventListener {
 		offG.setClip(0, 0, getSize().width, getSize().height);
 		
 		// Render this component, then paint the subcomponents.
-		super.paint(offG);
+		super.paintComponent(offG);
 		renderer.paint(offG, model);
 		
 		// Then blit to screen.
