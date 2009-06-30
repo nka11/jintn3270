@@ -5,6 +5,13 @@ import java.io.ByteArrayOutputStream;
 
 import com.sf.jintn3270.TerminalModel;
 
+/**
+ * RFC 857 - Echo.
+ * 
+ * If echo is disabled (meaning the remote host will not echo, we enable
+ * localEcho on the TerminalModel, so that typed characters will end up
+ * in the buffer.
+ */
 public class Echo extends Option {
 	public static final byte ECHO = (byte)1; // Echo option ID.
 	
