@@ -134,8 +134,8 @@ public class JTerminal extends JPanel implements TerminalEventListener {
 		offG.setClip(0, 0, getSize().width, getSize().height);
 		
 		// Render this component, then paint the subcomponents.
-		renderer.paint(offG, model);
 		super.paint(offG);
+		renderer.paint(offG, model);
 		
 		// Then blit to screen.
 		g.drawImage(offscreen, 0, 0, null);
