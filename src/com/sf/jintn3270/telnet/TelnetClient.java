@@ -148,14 +148,26 @@ public class TelnetClient extends Thread {
 		disconnected();
 	}
 	
+	/**
+	 * Gets the hostname we're connecting to.
+	 * @return the Hostname.
+	 */
 	public String getHost() {
 		return host;
 	}
 	
+	/**
+	 * Gets the port we're connecting to.
+	 * @return the port
+	 */
 	public int getPort() {
 		return port;
 	}
 	
+	/**
+	 * Returns weather or not we're attempting to use SSL.
+	 * @return ssl
+	 */
 	public boolean useSSL() {
 		return ssl;
 	}
@@ -164,6 +176,7 @@ public class TelnetClient extends Thread {
 	 * Invoked when we're disconnected
 	 */
 	protected void disconnected() {
+		this.model.setClient(null);
 	}
 	
 	/**

@@ -64,6 +64,11 @@ public abstract class TerminalModel {
 	}
 	
 	
+	public boolean isConnected() {
+		return this.client != null;
+	}
+	
+	
 	/**
 	 * Adds the given Listener
 	 */
@@ -88,7 +93,7 @@ public abstract class TerminalModel {
 		// TODO: IF localecho!
 		//buffer[cursor.row()][cursor.column()] = charFact.get(c);
 		//cursor.right();
-		if (client != null) {
+		if (isConnected()) {
 			client.send(charFact.get(c).getCode());
 		}
 		
@@ -305,7 +310,7 @@ public abstract class TerminalModel {
 		
 		public void down() {
 			row++;
-			if (row > buffer.length) {
+			if (row >= buffer.length) {
 				row = 0;
 			}
 		}
