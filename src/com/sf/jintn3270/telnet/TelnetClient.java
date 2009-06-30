@@ -103,9 +103,6 @@ public class TelnetClient extends Thread {
 		sock = null;
 		
 		options = new ConcurrentLinkedQueue<Option>();
-		options.add(new SuppressGA());
-		options.add(new Echo());
-		options.add(new EndOfRecord());
 		outStream = new ByteArrayOutputStream();
 	}
 	
@@ -204,7 +201,7 @@ public class TelnetClient extends Thread {
 	public void addOption(Option o) {
 		options.add(o);
 		if (isConnected()) {
-			sendWill(o.getCode());
+			o.initiate(this);
 		}
 	}
 	
@@ -437,6 +434,7 @@ public class TelnetClient extends Thread {
 		// collect all options outgoing bytes.
 		for (Option o : options) {
 			try {
+				byte[] optionOutput = o.outgoingBytes(outStream, this);
 				outStream.write(o.outgoingBytes(outStream, this));
 			} catch (IOException ioe) {
 			}
@@ -495,7 +493,8 @@ public class TelnetClient extends Thread {
 					sock.getOutputStream().flush();
 				}
 			} catch (Exception ex) {
-			} 
+				System.err.println(ex.toString());
+			}
 			// Play nice with thread schedulers.
 			Thread.yield();
 		}
@@ -507,6 +506,10 @@ public class TelnetClient extends Thread {
 	 */
 	public static void main(String[] args) {
 		TelnetClient client = new TelnetClient(args[0], Integer.parseInt(args[1]), Boolean.valueOf(args[2]).booleanValue());
+		client.addOption(new SuppressGA());
+		client.addOption(new Echo());
+		client.addOption(new EndOfRecord());
+		//client.addOption(new TerminalType());
 		client.start();
 	}
 }

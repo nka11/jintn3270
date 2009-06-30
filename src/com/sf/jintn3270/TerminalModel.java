@@ -40,6 +40,12 @@ public abstract class TerminalModel {
 	}
 	
 	/**
+	 * Returns the model name of the Terminal. This is used by the RFC 884, 
+	 * TerminalType option to report the terminal type to the remote host.
+	 */
+	public abstract String[] getModelName();
+	
+	/**
 	 * Initializes the buffer by allocate a new buffer array, then filling
 	 * the array with the character mapped to byte 0x00
 	 */

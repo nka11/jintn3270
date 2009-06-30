@@ -34,11 +34,9 @@ public class EndOfRecord extends Option {
 	}
 	
 	public byte[] outgoingBytes(ByteArrayOutputStream toSend, TelnetClient client) {
-		byte[] ret;
+		byte[] ret = nill;
 		if (isEnabled() && toSend.size() > 0) {
 			ret = markEOR;
-		} else {
-			ret = nill;
 		}
 		return ret;
 	}
