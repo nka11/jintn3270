@@ -1,21 +1,22 @@
-package com.sf.jintn3270.awt;
+package com.sf.jintn3270.swing;
 
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Panel;
 
-import java.awt.AWTEvent;
-import java.awt.AWTKeyStroke;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+
+import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 import com.sf.jintn3270.event.*;
 import com.sf.jintn3270.actions.TerminalAction;
 import com.sf.jintn3270.TerminalModel;
 
-public class Terminal extends Panel implements TerminalEventListener {
+public class JTerminal extends JPanel implements TerminalEventListener {
 	Image offscreen;
 	TerminalRenderer renderer;
 	
@@ -33,7 +34,6 @@ public class Terminal extends Panel implements TerminalEventListener {
 	
 	public Terminal(TerminalModel tm, TerminalRenderer rn, TerminalKeyMap km) {
 		super();
-		enableEvents(AWTEvent.KEY_EVENT_MASK);
 		setTerminalRenderer(rn);
 		setTerminalModel(tm);
 		setKeyMap(km);
@@ -48,6 +48,7 @@ public class Terminal extends Panel implements TerminalEventListener {
 		if (tm != null) {
 			model.addTerminalEventListener(this);
 		}
+		setKeyMap(keyMap);
 	}
 	
 	
@@ -58,6 +59,15 @@ public class Terminal extends Panel implements TerminalEventListener {
 	
 	public void setKeyMap(TerminalKeyMap km) {
 		this.keyMap = km;
+		resetKeyboardActions();
+		if (keyMap != null) {
+			for (KeyStroke stroke : keyMap.getMappedStrokes()) {
+				TerminalAction ta = keyMap.getAction(stroke);
+				ta.setTerminalModel(model);
+				getInputMap().put(stroke, ta.getName());
+				getActionMap().put(ta.getName(), ta);
+			}
+		}
 	}
 	
 	
@@ -91,31 +101,27 @@ public class Terminal extends Panel implements TerminalEventListener {
 		return renderer.getMinimumSize(model);
 	}
 	
+	protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
+		boolean isMapped = false;
+		// Do we know of anything to do for this specific KeyEvent (not KeyStroke!)
+		TerminalAction ta = keyMap.getAction(e, model);
+		if (ta != null) {
+			isMapped = true;
+			ta.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, KeyEvent.getKeyText(e.getKeyCode())));
+		}
+		
+		// If we didn't handle the KeyEvent, send this along to the InputMap/ActionMap handling implemented by the parent class.
+		if (!isMapped) {
+			isMapped = super.processKeyBinding(ks, e, condition, pressed);
+		}
+		
+		return isMapped;
+	}
+	
+	
 	protected void processKeyEvent(KeyEvent e) {
-		AWTKeyStroke stroke = AWTKeyStroke.getAWTKeyStrokeForEvent(e);
-		if (keyMap != null) {
-			TerminalAction action = keyMap.getAction(stroke);
-			if (action != null) {
-				e.consume();
-				try {
-					action.doAction(model);
-				} catch (Exception ex) {}
-			}
-		}
-		
-		if (!e.isConsumed()) {
-			TerminalAction action = keyMap.getAction(e, model);
-			if (action != null) {
-				e.consume();
-				try {
-					action.doAction(model);
-				} catch (Exception ex) {}
-			}
-		}
-		
-		if (!e.isConsumed()) {
-			keyMap.processKeyEvent(e);
-		}
+		super.processKeyEvent(e);
+		keyMap.processKeyEvent(e);
 	}
 	
 	

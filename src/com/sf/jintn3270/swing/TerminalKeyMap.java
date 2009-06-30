@@ -1,15 +1,16 @@
-package com.sf.jintn3270.awt;
+package com.sf.jintn3270.swing;
 
-import java.awt.AWTKeyStroke;
 import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
 
 import com.sf.jintn3270.actions.TerminalAction;
 import com.sf.jintn3270.TerminalModel;
 
 public interface TerminalKeyMap {
-	public AWTKeyStroke[] getMappedStrokes();
+	public KeyStroke[] getMappedStrokes();
 	
-	public TerminalAction getAction(AWTKeyStroke ks);
+	public TerminalAction getAction(KeyStroke ks);
 	
 	public TerminalAction getAction(KeyEvent ke, TerminalModel term);
 	

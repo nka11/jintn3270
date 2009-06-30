@@ -1,24 +1,24 @@
-package com.sf.jintn3270.awt;
+package com.sf.jintn3270.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
-import java.awt.Frame;
+
+import javax.swing.JFrame;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import com.sf.jintn3270.telnet.TelnetClient;
 
-public class TelnetFrame extends Frame {
+public class TelnetFrame extends JFrame {
 	TelnetClient client;
-	Terminal term;
-	
+	JTerminal term;
 	
 	public TelnetFrame(TelnetClient tc) {
 		super(tc.getHost() + ":" + tc.getPort());
 		this.client = tc;
 		
-		term = new Terminal(tc.getTerminalModel());
+		term = new JTerminal(tc.getTerminalModel());
 		term.setFont(Font.decode("Lucida Console-12"));
 		
 		this.setLayout(new BorderLayout());

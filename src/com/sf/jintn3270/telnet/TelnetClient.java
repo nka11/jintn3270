@@ -317,6 +317,7 @@ public class TelnetClient extends Thread {
 								}
 							}
 							if (!dosent) {
+								System.out.println("Sending a dont for " + incoming[2]);
 								sendDont(incoming[2]);
 							}
 						}
@@ -335,6 +336,7 @@ public class TelnetClient extends Thread {
 							if (enabled) {
 								sendWill(incoming[2]);
 							} else {
+								System.out.println("Sending a wont for " + incoming[2]);
 								sendWont(incoming[2]);
 							}
 						}

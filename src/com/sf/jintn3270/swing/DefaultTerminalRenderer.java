@@ -1,7 +1,6 @@
-package com.sf.jintn3270.awt;
+package com.sf.jintn3270.swing;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -15,10 +14,12 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
+import javax.swing.JComponent;
+
 import com.sf.jintn3270.TerminalModel;
 
 
-public class DefaultTerminalRenderer extends Component implements TerminalRenderer {
+public class DefaultTerminalRenderer extends JComponent implements TerminalRenderer {
 	FontRenderContext fontContext;
 	RenderingHints renderHints;
 	

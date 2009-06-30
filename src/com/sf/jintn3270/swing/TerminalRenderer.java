@@ -1,4 +1,4 @@
-package com.sf.jintn3270.awt;
+package com.sf.jintn3270.swing;
 
 import java.awt.Dimension;
 import java.awt.Font;

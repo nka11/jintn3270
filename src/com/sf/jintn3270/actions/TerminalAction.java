@@ -3,8 +3,9 @@ package com.sf.jintn3270.actions;
 import com.sf.jintn3270.TerminalModel;
 
 import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 
-public abstract class TerminalAction {
+public abstract class TerminalAction extends AbstractAction {
 	TerminalModel model;
 	
 	protected TerminalAction() {
