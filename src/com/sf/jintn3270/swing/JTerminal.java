@@ -148,6 +148,8 @@ public class JTerminal extends JPanel implements TerminalEventListener {
 	
 	public void setFont(Font f) {
 		super.setFont(f);
-		renderer.setFont(f);
+		if (renderer != null) {
+			renderer.setFont(f);
+		}
 	}
 }
