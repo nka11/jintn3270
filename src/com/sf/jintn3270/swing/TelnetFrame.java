@@ -2,7 +2,9 @@ package com.sf.jintn3270.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.Color;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 
 import java.awt.event.WindowAdapter;
@@ -20,6 +22,7 @@ public class TelnetFrame extends JFrame {
 		
 		term = new JTerminal(tc.getTerminalModel());
 		term.setFont(Font.decode("Lucida Console-12"));
+		term.setBorder(BorderFactory.createLineBorder(Color.BLACK, 4));
 		
 		this.setLayout(new BorderLayout());
 		this.add(term);

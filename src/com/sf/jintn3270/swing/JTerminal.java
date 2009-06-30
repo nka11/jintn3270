@@ -95,11 +95,17 @@ public class JTerminal extends JPanel implements TerminalEventListener {
 	
 	
 	public Dimension getPreferredSize() {
-		return renderer.getPreferredSize(model);
+		Dimension size = renderer.getPreferredSize(model);
+		size.setSize(size.getWidth() + (getInsets().left + getInsets().right),
+		             size.getHeight() + (getInsets().top + getInsets().bottom));
+		return size;
 	}
 	
 	public Dimension getMinimumSize() {
-		return renderer.getMinimumSize(model);
+		Dimension size = renderer.getMinimumSize(model);
+		size.setSize(size.getWidth() + (getInsets().left + getInsets().right),
+		             size.getHeight() + (getInsets().top + getInsets().bottom));
+		return size;
 	}
 	
 	protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
@@ -128,18 +134,22 @@ public class JTerminal extends JPanel implements TerminalEventListener {
 	
 	public void paintComponent(Graphics g) {
 		if (offscreen == null) {
-			offscreen = createImage(getSize().width, getSize().height);
+			offscreen = createImage(getSize().width - (getInsets().right + getInsets().left), 
+			                        getSize().height - (getInsets().bottom + getInsets().top));
 		}
-		// Set the clipping region to include the entire component.
+		// Set the clipping region to include the full size of the image to be printed.
 		Graphics offG = offscreen.getGraphics();
-		offG.setClip(0, 0, getSize().width, getSize().height);
+		
+		offG.setClip(0, 0, getSize().width - (getInsets().right + getInsets().left), 
+		                   getSize().height - (getInsets().bottom + getInsets().top));
 		
 		// Render this component, then paint the subcomponents.
-		super.paintComponent(offG);
 		renderer.paint(offG, model);
 		
 		// Then blit to screen.
-		g.drawImage(offscreen, 0, 0, null);
+		g.drawImage(offscreen, getInsets().left, getInsets().right, null);
+		
+		// Dispose the Graphics object to the off-screen image.
 		offG.dispose();
 	}
 	

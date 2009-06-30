@@ -55,7 +55,6 @@ public class DefaultTerminalRenderer extends JComponent implements TerminalRende
 		
 		Point2D p = new Point2D.Float();
 		for (int line = 0; line < m.getBufferHeight(); line++) {
-			// TODO: Use AttributedCharacterIterator to read/render the column.
 			for (int col = 0; col < m.getBufferWidth(); col++) {
 				p.setLocation(col * (charBound.getWidth() + 1),
 				              (lineMetrics.getAscent() * (line + 1)) + 
@@ -109,12 +108,13 @@ public class DefaultTerminalRenderer extends JComponent implements TerminalRende
 		
 		// If we have a clip && we're supposed to modify the font...
 		Rectangle bounds = g2d.getClipBounds();
+		
 		if (bounds != null && (scaleFont || stretchFont)) {
 			// Given the height / width of the buffer, set the font size.
 			Rectangle2D.Double idealCharSize = 
 					new Rectangle2D.Double(0d, 0d, 
-							(bounds.getWidth() / m.getBufferWidth()) - 1,
-							(bounds.getHeight() / m.getBufferHeight()));
+							(bounds.getWidth() / m.getBufferWidth()) - 1.5d,
+							(bounds.getHeight() / m.getBufferHeight()) - 1.5d);
 			// Derive a scaled font instance
 			if (scaleFont) {
 				Font reference = Font.decode(getFont().getFontName() + "-" + getStyle(getFont()) + "-12").deriveFont(new AffineTransform());
