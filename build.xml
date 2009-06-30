@@ -65,8 +65,8 @@
 		</java>
 	</target>
 	
-	<target name="run-awt-test" depends="package">
-		<java classname="com.sf.jintn3270.awt.TelnetFrame" fork="true" maxmemory="128m">
+	<target name="run-swing-test" depends="package">
+		<java classname="com.sf.jintn3270.swing.TelnetFrame" fork="true" maxmemory="128m">
 			<arg value="${test.host}"/>
 			<arg value="${test.port}"/>
 			<arg value="${test.ssl}"/>
