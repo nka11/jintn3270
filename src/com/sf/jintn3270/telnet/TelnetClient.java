@@ -104,6 +104,8 @@ public class TelnetClient extends Thread {
 		
 		options = new ConcurrentLinkedQueue<Option>();
 		options.add(new SuppressGA());
+		options.add(new Echo());
+		options.add(new EndOfRecord());
 		outStream = new ByteArrayOutputStream();
 	}
 	
@@ -185,7 +187,7 @@ public class TelnetClient extends Thread {
 	public void connected() {
 		this.model.setClient(this);
 		for (Option o : options) {
-			sendWill(o.getCode());
+			o.initiate(this);
 		}
 	}
 	
@@ -341,7 +343,7 @@ public class TelnetClient extends Thread {
 							boolean enabled = false;
 							for (Option o : options) {
 								if (o.getCode() == incoming[2]) {
-									o.setEnabled(true);
+									o.setEnabled(true, this);
 									enabled = true;
 									break;
 								}
@@ -360,7 +362,7 @@ public class TelnetClient extends Thread {
 						if (incoming.length >= 3) {
 							for (Option o : options) {
 								if (o.getCode() == incoming[2]) {
-									o.setEnabled(false);
+									o.setEnabled(false, this);
 								}
 							}
 						}
@@ -435,7 +437,7 @@ public class TelnetClient extends Thread {
 		// collect all options outgoing bytes.
 		for (Option o : options) {
 			try {
-				outStream.write(o.outgoingBytes(outStream));
+				outStream.write(o.outgoingBytes(outStream, this));
 			} catch (IOException ioe) {
 			}
 		}
@@ -505,7 +507,6 @@ public class TelnetClient extends Thread {
 	 */
 	public static void main(String[] args) {
 		TelnetClient client = new TelnetClient(args[0], Integer.parseInt(args[1]), Boolean.valueOf(args[2]).booleanValue());
-		client.addOption(new EndOfRecord());
 		client.start();
 	}
 }

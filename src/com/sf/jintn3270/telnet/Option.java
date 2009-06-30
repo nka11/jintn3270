@@ -7,8 +7,11 @@ public abstract class Option {
 	
 	private boolean enabled;
 	
+	protected byte[] nill;
+	
 	protected Option() {
 		enabled = false;
+		nill = new byte[0];
 		out = new ByteArrayOutputStream();
 	}
 	
@@ -19,13 +22,15 @@ public abstract class Option {
 	public abstract byte getCode();
 	
 	
+	public abstract void initiate(TelnetClient client);
+	
 	
 	public int consumeIncomingBytes(byte[] incoming, TelnetClient client) {
 		return 0;
 	}
 	
 	
-	public byte[] outgoingBytes(ByteArrayOutputStream toSend) {
+	public byte[] outgoingBytes(ByteArrayOutputStream toSend, TelnetClient client) {
 		byte[] ret = out.toByteArray();
 		out.reset();
 		return ret;
@@ -37,7 +42,7 @@ public abstract class Option {
 	}
 	
 	
-	void setEnabled(boolean b) {
+	void setEnabled(boolean b, TelnetClient client) {
 		enabled = b;
 		if (enabled) {
 			System.out.println("   ENABLED " + getName());

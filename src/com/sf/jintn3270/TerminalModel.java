@@ -22,6 +22,8 @@ public abstract class TerminalModel {
 	
 	TelnetClient client;
 	
+	boolean localEcho;
+	
 	protected EventListenerList listenerList = new EventListenerList();
 	
 	/**
@@ -33,6 +35,7 @@ public abstract class TerminalModel {
 		this.charFact = charFact;
 		this.cursor = new CursorPosition();
 		this.client = null;
+		this.localEcho = false;
 		initializeBuffer(rows, cols);
 	}
 	
@@ -70,6 +73,14 @@ public abstract class TerminalModel {
 	
 	
 	/**
+	 * Enables / Disables local echoing.
+	 */
+	public void setLocalEcho(boolean localEcho) {
+		this.localEcho = localEcho;
+	}
+	
+	
+	/**
 	 * Adds the given Listener
 	 */
 	public void addTerminalEventListener(TerminalEventListener listener) {
@@ -90,9 +101,10 @@ public abstract class TerminalModel {
 	public void type(char c) {
 		CursorPosition before = (CursorPosition)cursor.clone();
 		
-		// TODO: IF localecho!
-		//buffer[cursor.row()][cursor.column()] = charFact.get(c);
-		//cursor.right();
+		if (localEcho) {
+			buffer[cursor.row()][cursor.column()] = charFact.get(c);
+			cursor.right();
+		}
 		if (isConnected()) {
 			client.send(charFact.get(c).getCode());
 		}

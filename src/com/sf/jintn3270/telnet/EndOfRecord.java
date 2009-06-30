@@ -4,6 +4,13 @@ import java.io.ByteArrayOutputStream;
 
 import com.sf.jintn3270.TerminalModel;
 
+/**
+ * Implementation of RFC 885
+ * 
+ * When this option is enabled, each outgoing frame being sent to the remote
+ * host is appended with and EOR command. Incoming frames with IAC, EOR are 
+ * then consumed by this option.
+ */
 public class EndOfRecord extends Option {
 	public static final byte EOR = (byte)239; // End of Record.
 	
@@ -22,12 +29,16 @@ public class EndOfRecord extends Option {
 		return (byte)25;
 	}
 	
-	public byte[] outgoingBytes(ByteArrayOutputStream toSend) {
+	public void initiate(TelnetClient client) {
+		client.sendWill(getCode());
+	}
+	
+	public byte[] outgoingBytes(ByteArrayOutputStream toSend, TelnetClient client) {
 		byte[] ret;
 		if (isEnabled() && toSend.size() > 0) {
 			ret = markEOR;
 		} else {
-			ret = new byte[0];
+			ret = nill;
 		}
 		return ret;
 	}
