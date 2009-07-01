@@ -14,14 +14,20 @@ public class TerminalModel3278 extends TerminalModel {
 		opts[0] = new Tn3270e();
 	}
 	
+	
 	public String[] getModelName() {
 		return model.terminalName();
 	}
 	
+	
 	public Option[] getRequiredOptions() {
 		return opts;
 	}
-
+	
+	
+	/**
+	 * Supported TerminalTypes & modes.
+	 */
 	public enum TermType3278 {
 		MODEL2(24, 80, new String[] {"IBM-3278-2-E", "IBM-3278-2"}),
 		MODEL3(32, 80, new String[] {"IBM-3278-3-E", "IBM-3278-3"}),

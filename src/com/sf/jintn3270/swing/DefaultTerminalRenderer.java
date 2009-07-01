@@ -17,7 +17,7 @@ import java.awt.geom.Rectangle2D;
 import javax.swing.JComponent;
 
 import com.sf.jintn3270.TerminalModel;
-
+import com.sf.jintn3270.TerminalCharacter;
 
 public class DefaultTerminalRenderer extends JComponent implements TerminalRenderer {
 	FontRenderContext fontContext;
@@ -59,8 +59,7 @@ public class DefaultTerminalRenderer extends JComponent implements TerminalRende
 				p.setLocation(col * (charBound.getWidth() + 1),
 				              (lineMetrics.getAscent() * (line + 1)) + 
 					(line * (lineMetrics.getDescent() + lineMetrics.getLeading())));
-				
-				g2d.drawString("" + m.getChar(line, col).getDisplay(), (float)p.getX(), (float)p.getY());
+				paintChar(g2d, m.getChar(line, col), (float)p.getX(), (float)p.getY());
 			}
 		}
 		
@@ -70,6 +69,10 @@ public class DefaultTerminalRenderer extends JComponent implements TerminalRende
 				(m.cursor().row() * (lineMetrics.getDescent() + lineMetrics.getLeading())));
 		Rectangle2D cursorRect = new Rectangle2D.Double(p.getX(), p.getY(), charBound.getWidth(), 2);
 		g2d.fill(cursorRect);
+	}
+	
+	protected void paintChar(Graphics2D g2d, TerminalCharacter c, float x, float y) {
+		g2d.drawString("" + c.getDisplay(), x, y);
 	}
 	
 	/**
