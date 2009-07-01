@@ -85,7 +85,7 @@ public abstract class Option {
 	/**
 	 * Set by the TelnetClient when this option is either disabled or enabled.
 	 */
-	void setEnabled(boolean b, TelnetClient client) {
+	public void setEnabled(boolean b, TelnetClient client) {
 		enabled = b;
 		if (enabled) {
 			System.out.println("   ENABLED " + getName());

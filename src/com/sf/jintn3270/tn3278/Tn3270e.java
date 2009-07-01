@@ -6,6 +6,8 @@ import com.sf.jintn3270.telnet.TelnetClient;
 import java.io.ByteArrayOutputStream;
 
 public class Tn3270e extends Option {
+	public static final byte TN3270E = (byte)40;
+	
 	public Tn3270e() {
 		super();
 	}
@@ -15,7 +17,7 @@ public class Tn3270e extends Option {
 	}
 	
 	public byte getCode() {
-		return (byte)40;
+		return TN3270E;
 	}
 	
 	

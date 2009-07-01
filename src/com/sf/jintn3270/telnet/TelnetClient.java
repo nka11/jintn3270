@@ -265,7 +265,7 @@ public class TelnetClient extends Thread {
 	/**
 	 * Writes a DO option to the output buffer
 	 */
-	void sendDo(byte code) {
+	public void sendDo(byte code) {
 		try {
 			outStream.write(new byte[] {IAC, DO, code});
 		} catch (IOException e) {}
@@ -274,7 +274,7 @@ public class TelnetClient extends Thread {
 	/**
 	 * Writes a WILL option to the output buffer.
 	 */
-	void sendWill(byte code) {
+	public void sendWill(byte code) {
 		try {
 			outStream.write(new byte[] {IAC, WILL, code});
 		} catch (IOException e) {}
@@ -283,7 +283,7 @@ public class TelnetClient extends Thread {
 	/**
 	 * Writes a DONT option to the output buffer.
 	 */
-	void sendDont(byte code) {
+	public void sendDont(byte code) {
 		try {
 			outStream.write(new byte[] {IAC, DONT, code});
 		} catch (IOException e) {}
@@ -292,7 +292,7 @@ public class TelnetClient extends Thread {
 	/**
 	 * Writes a WONT option to the output buffer.
 	 */
-	void sendWont(byte code) {
+	public void sendWont(byte code) {
 		try {
 			outStream.write(new byte[] {IAC, WONT, code});
 		} catch (IOException e) {}

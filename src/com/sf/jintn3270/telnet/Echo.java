@@ -29,7 +29,7 @@ public class Echo extends Option {
 		client.sendDo(getCode());
 	}
 	
-	void setEnabled(boolean b, TelnetClient client) {
+	public void setEnabled(boolean b, TelnetClient client) {
 		super.setEnabled(b, client);
 		client.getTerminalModel().setLocalEcho(!isEnabled());
 	}

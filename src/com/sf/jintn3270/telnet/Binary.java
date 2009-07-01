@@ -31,10 +31,9 @@ public class Binary extends Option {
 	}
 	
 	/**
-	 * Do not initiate.
+	 * Do nothing to initiate.
 	 */
-	public void initiate(TelnetClient client) {
-	}
+	public void initiate(TelnetClient client) {}
 	
 	
 	public byte[] outgoingBytes(ByteArrayOutputStream toSend, TelnetClient client) {
