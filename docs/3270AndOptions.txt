@@ -34,5 +34,33 @@ Do I implement 1647 AND 1041? What about not implementing 1041, and still
 supporting 3270 data streams based on the combination of 856, 884, and 885?
 
 This is quickly becoming a hodge-podge... There -has- to be a good solution to 
-support all of this.
+support all of this....
+
+
+And that good solution is:
+--------------------------
+1.) To implement the various RFC's. All of them.
+	* RFC 856 - Done. Sends incoming binary data to an OutputStream.
+	* RFC 884 - Done. Sends subcommands. Not yet fully tested.
+	* RFC 885 - Done. Working.
+	* RFC 1041 - My testing environment does not support this Option. However a
+	  I -think- the version in subversion will work. In theory, it should.
+	  It encapsulated the Binary and EOR implementations that are described as
+	  intristic to the implementation of this Option.
+	* RFC 1576 - This should be working, if the above 3 RFCs are properly
+	  implemented. The issue here is that the output stream of the Binary
+	  Option will need to be parsed by a 3270 parser, same as 1041.
+	* RFC 1647 - TN3270e is supported by my environment, and since it is not
+	  only the newest option, but also the most structured, I plan on creating
+	  a very solid implementation of this. RFC.
+2.) Forward incoming Binary data to a 3270 parser that can also frame the
+incoming streams of bytes. I plan to create an OutputStream that merely forwards
+all written bytes to the print() methods of the TerminaModel class. This way,
+specific terminalmodels can process the incoming byte stream as it arrives.
+
+This should allow us to fully abstract the handling of 3270 data streams within
+telnet data streams structured & negotiated in any of the three combinations of
+entering 3270 mode.
+
+
 
