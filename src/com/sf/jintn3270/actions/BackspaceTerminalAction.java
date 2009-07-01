@@ -13,6 +13,6 @@ public class BackspaceTerminalAction extends TerminalAction {
 	
 	public void doAction(TerminalModel model) throws Exception {
 		model.eraseChar();
-		model.getClient().sendCommand(model.getClient().EC);
+		model.getClient().sendCommand((byte)model.getClient().EC);
 	}
 }

@@ -65,8 +65,20 @@
 		</java>
 	</target>
 	
-	<target name="run-swing-test" depends="package">
+	<target name="run-swing-nvt-test" depends="package">
 		<java classname="com.sf.jintn3270.swing.TelnetFrame" fork="true" maxmemory="128m">
+			<arg value="${test.host}"/>
+			<arg value="${test.port}"/>
+			<arg value="${test.ssl}"/>
+			<classpath>
+				<path refid="proj.classpath"/>
+				<filelist dir="." files="${ant.project.name}.jar"/>
+			</classpath>
+		</java>
+	</target>
+	
+	<target name="run-3270-test" depends="package">
+		<java classname="com.sf.jintn3270.tn3279.TestClient" fork="true" maxmemory="128m">
 			<arg value="${test.host}"/>
 			<arg value="${test.port}"/>
 			<arg value="${test.ssl}"/>

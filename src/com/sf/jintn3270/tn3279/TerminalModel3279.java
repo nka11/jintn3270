@@ -3,12 +3,15 @@ package com.sf.jintn3270.tn3279;
 import com.sf.jintn3270.TerminalModel;
 import com.sf.jintn3270.telnet.Option;
 
+import com.sf.jintn3270.DefaultCharacterFactory;
+import com.sf.jintn3270.TerminalCharacter;
+
 public class TerminalModel3279 extends TerminalModel {
 	TermType3279 model;
 	Option[] opts;
 	
 	public TerminalModel3279(TermType3279 type) {
-		super(type.rows(), type.cols(), new EbcdicCharacterFactory());
+		super(type.rows(), type.cols(), new DefaultCharacterFactory());
 		this.model = type;
 		opts = new Option[1];
 		opts[0] = new Tn3270e();
@@ -22,6 +25,13 @@ public class TerminalModel3279 extends TerminalModel {
 	
 	public Option[] getRequiredOptions() {
 		return opts;
+	}
+	
+	
+	public void print(TerminalCharacter ch) {
+		super.print(ch);
+		System.out.print(ch.getDisplay());
+		System.out.flush();
 	}
 	
 	
