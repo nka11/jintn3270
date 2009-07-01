@@ -103,6 +103,9 @@ public class TelnetClient extends Thread {
 		sock = null;
 		
 		options = new ConcurrentLinkedQueue<Option>();
+		for (Option o : model.getRequiredOptions()) {
+			options.add(o);
+		}
 		outStream = new ByteArrayOutputStream();
 	}
 	

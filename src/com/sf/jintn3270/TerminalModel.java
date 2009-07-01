@@ -6,6 +6,7 @@ import com.sf.jintn3270.event.TerminalEvent;
 import com.sf.jintn3270.event.TerminalEventListener;
 
 import com.sf.jintn3270.telnet.TelnetClient;
+import com.sf.jintn3270.telnet.Option;
 
 /**
  * A TerminalModel is where telnet stream data goes to be rendered by a view.
@@ -44,6 +45,14 @@ public abstract class TerminalModel {
 	 * TerminalType option to report the terminal type to the remote host.
 	 */
 	public abstract String[] getModelName();
+	
+	/**
+	 * Returns a list of required Telnet Option implmentations for this 
+	 * TerminalModel to function as expected.
+	 */
+	public Option[] getRequiredOptions() {
+		return new Option[0];
+	}
 	
 	/**
 	 * Initializes the buffer by allocate a new buffer array, then filling
