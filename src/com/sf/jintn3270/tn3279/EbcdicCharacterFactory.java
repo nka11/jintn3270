@@ -1,4 +1,4 @@
-package com.sf.jintn3270.tn3278;
+package com.sf.jintn3270.tn3279;
 
 import com.sf.jintn3270.CharacterFactory;
 import com.sf.jintn3270.TerminalCharacter;
