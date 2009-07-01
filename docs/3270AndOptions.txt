@@ -1,0 +1,38 @@
+This document is meant to outline some of the things I've learned as I implement
+not just telnet, but also 327x emulation. First off, there is a massive
+hodge-podge of ways to do this.
+
+In the beginning:
+	There was RFC 854 - Basic Telnet
+	      
+	      and RFC 856 - Binary Option 
+		 and RFC 884 - Terminal Type Option 
+		 and RFC 885 - End Of Record (EOR) Option
+
+The combination of these three options applied over Telnet was apparently used
+by many, many developers to determine support for 3270 data streams. From what I
+have been able to glean from reading RFC 1647 (Tn3270e) if a terminal:
+	* Requested BINARY mode, and
+	* Requested EOR, and
+	* Reported a terminal type "IBM-327x-x" then the remote host -should- start
+	  sending the 3270 data stream within the BINARY stream.
+It would then be up to the terminal to handle everything coming in from the
+remote host between IACs (thanks to EOR) as 3270 data streams -- when in BINARY
+mode.
+
+Yikes! But no one knew -exactly- what was expected, so it was sort of a grab-bag
+of what combinations would work and what wouldn't. In an attempt to document
+this process, RFC 1041 - 3270 Regime Option, was introduced. Very few developers
+actually implemented this option, from what I understand. What a shame.
+
+Enter RFC 1647: A far more comprehensive, coheasive, and widely supported method
+of sending 3270 data streams over telnet.
+
+So now I have a quandry...
+
+Do I implement 1647 AND 1041? What about not implementing 1041, and still
+supporting 3270 data streams based on the combination of 856, 884, and 885?
+
+This is quickly becoming a hodge-podge... There -has- to be a good solution to 
+support all of this.
+
