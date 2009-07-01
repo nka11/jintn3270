@@ -26,7 +26,7 @@ public class EndOfRecord extends Option {
 	}
 	
 	public byte getCode() {
-		return (byte)25;
+		return EOR;
 	}
 	
 	public void initiate(TelnetClient client) {
