@@ -64,6 +64,10 @@ public abstract class Option {
 		return 0;
 	}
 	
+	public int consumeIncomingSubcommand(byte[] incoming, TelnetClient client) {
+		return 0;
+	}
+	
 	
 	/**
 	 * Retrieve the outgoing bytes from the <code>out</code> buffer and 

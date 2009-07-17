@@ -78,7 +78,7 @@
 	</target>
 	
 	<target name="run-3270-test" depends="package">
-		<java classname="com.sf.jintn3270.tn3279.TestClient" fork="true" maxmemory="128m">
+		<java classname="com.sf.jintn3270.tn3278.TestClient" fork="true" maxmemory="128m">
 			<arg value="${test.host}"/>
 			<arg value="${test.port}"/>
 			<arg value="${test.ssl}"/>

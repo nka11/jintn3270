@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * the consumeIncommingBytes method is called. If no one consumes any bytes 
  * (everything returns 'zero') 
  */
-public class TelnetClient extends Thread {
+public class TelnetClient extends Thread implements TelnetConstants {
 	String host;
 	int port;
 	boolean ssl;
@@ -46,29 +46,6 @@ public class TelnetClient extends Thread {
 	AbstractQueue<Option> options;
 	
 	TerminalModel model;
-	
-	/* Constants as defined by RFC 854 */ 
-	
-	public static final byte IAC = (byte)255;
-	
-	private static final byte DONT = (byte)254;
-	private static final byte DO = (byte)253;
-	private static final byte WONT = (byte)252;
-	private static final byte WILL = (byte)251;
-	
-	
-	public static final byte NOP = (byte)241; // No Op!
-	public static final byte DM = (byte)242; // Data Mark... data stream portion of Sync
-	
-	public static final byte BRK = (byte)243; // Break
-	public static final byte IP = (byte)244; // Interrupt Process
-	public static final byte AO = (byte)245; // Abort Output
-	public static final byte AYT = (byte)246; // Are you there
-	public static final byte EC = (byte)247; // Erase Character
-	public static final byte EL = (byte)248; // Erase Line
-	public static final byte GA = (byte)249; // Go Ahead
-	public static final byte SB = (byte)250; // Start Subcommand
-	public static final byte SE = (byte)240; // End Subcommand
 	
 	/**
 	 * Create a TelnetClient with a DefaultTerminalModel that connects to the
@@ -391,7 +368,7 @@ public class TelnetClient extends Thread {
 						if (incoming.length >= 5) { // Must be at least IAC, SB, <code>, IAC, SE
 							for (Option o : options) {
 								if (o.getCode() == incoming[2]) {
-									read = o.consumeIncomingBytes(incoming, this);
+									read = o.consumeIncomingSubcommand(incoming, this);
 									break;
 								}
 							}
