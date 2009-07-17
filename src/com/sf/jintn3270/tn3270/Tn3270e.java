@@ -7,6 +7,7 @@ import com.sf.jintn3270.telnet.TelnetConstants;
 import java.util.EnumSet;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class Tn3270e extends Option implements TelnetConstants {
 	public static final byte TN3270E = (byte)40;
@@ -60,6 +61,7 @@ public class Tn3270e extends Option implements TelnetConstants {
 	}
 	
 	public int consumeIncomingBytes(byte[] incoming, TelnetClient client) {
+		System.out.println("Non-subcommand, bytes remaining: " + incoming.length);
 		return 0;
 	}
 	
@@ -74,17 +76,31 @@ public class Tn3270e extends Option implements TelnetConstants {
 		System.out.println("Subcommand is " + length + " bytes long.");
 		if (length > 0) {
 			System.out.println("Subcommand: " + resolveValue(incoming[3], Command.class) + " " + resolveValue(incoming[4], Command.class));
-			
-			
-			
+			if (incoming[3] == Command.SEND.ordinal() && incoming[4] == Command.DEVICE_TYPE.ordinal()) {
+				try {
+					System.out.println("Sending DEVICE_TYPE");
+					out.write(new byte[] {IAC, SB, (byte)Command.DEVICE_TYPE.ordinal(), (byte)Command.REQUEST.ordinal()});
+					out.write(((client.getTerminalModel().getModelName())[0]).getBytes("ASCII"));
+					out.write(new byte[] {IAC, SE});
+				} catch (IOException ioe) {
+					System.out.println("Failed to send Device Type response.");
+				}
+			}
 		}
 		return length;
 	}
 	
+	/**
+	 * If we're enabled, defer to our parent.
+	 * If we're not enabled, then we never have anything to write.
+	 */
 	public byte[] outgoingBytes(ByteArrayOutputStream toSend, TelnetClient client) {
-		return nill;
+		// If we're not enabled, we never send.
+		if (!isEnabled()) {
+			return nill;
+		}
+		return super.outgoingBytes(toSend, client);
 	}
-	
 	
 	/**
 	 * Resolves a byte to an Enumeration Value.

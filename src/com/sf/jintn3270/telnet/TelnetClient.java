@@ -414,7 +414,6 @@ public class TelnetClient extends Thread implements TelnetConstants {
 		// collect all options outgoing bytes.
 		for (Option o : options) {
 			try {
-				byte[] optionOutput = o.outgoingBytes(outStream, this);
 				outStream.write(o.outgoingBytes(outStream, this));
 			} catch (IOException ioe) {
 			}
