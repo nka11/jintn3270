@@ -12,15 +12,14 @@ public class UByteInputStream extends FilterInputStream {
 	public int read(short[] s) throws IOException {
 		byte[] b = new byte[s.length];
 		int read = in.read(b);
-		s = fromUByte(b);
+		fromUByte(b, s, read);
 		return read;
 	}
 	
-	private static short[] fromUByte(byte[] b) {
-		short[] ret = new short[b.length];
-		for (int i = 0; i < b.length; i++) {
-			ret[i] = (short)(b[i] & 0xff);
+	
+	private static void fromUByte(byte[] b, short[] s, int length) {
+		for (int i = 0; i < length; i++) {
+			s[i] = (short)(b[i] & 0xff);
 		}
-		return ret;
 	}
 }
