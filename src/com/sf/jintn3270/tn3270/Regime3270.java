@@ -92,7 +92,6 @@ public class Regime3270 extends Option {
 					sb.append((char)b);
 				}
 				String regimeName = sb.toString();
-				System.out.println("received REGIME IS: " + regimeName);
 				
 				// If we got something other than an empty string back as 
 				// part of our Regime negotiation, then we need to consider
@@ -102,13 +101,11 @@ public class Regime3270 extends Option {
 					binaryHandler.setEnabled(true, client);
 					eor.setEnabled(true, client);
 					
-					System.out.println("Created a binary handler");
 				} else {
 					binaryHandler.setEnabled(false, client);
 					eor.setEnabled(false, client);
 					
 					binaryHandler = null;
-					System.out.println("Disabled binary handler");
 				}
 				
 				read = 4 + regime.length + 2;

@@ -299,7 +299,6 @@ public class TelnetClient extends Thread implements TelnetConstants {
 								}
 							}
 							if (!dosent) {
-								System.out.println("Sending a dont for " + incoming[2]);
 								sendDont(incoming[2]);
 							}
 						}
@@ -318,7 +317,6 @@ public class TelnetClient extends Thread implements TelnetConstants {
 							if (enabled) {
 								sendWill(incoming[2]);
 							} else {
-								System.out.println("Sending a wont for " + incoming[2]);
 								sendWont(incoming[2]);
 							}
 						}
@@ -364,8 +362,6 @@ public class TelnetClient extends Thread implements TelnetConstants {
 							}
 						}
 						break;
-					default:
-						System.out.println("UNKNOWN IAC: " + incoming[2]);
 				}
 			}
 		}
@@ -462,6 +458,7 @@ public class TelnetClient extends Thread implements TelnetConstants {
 					sock.getOutputStream().flush();
 				}
 			} catch (Exception ex) {
+				ex.printStackTrace();
 				System.err.println(ex.toString());
 			}
 			// Play nice with thread schedulers.

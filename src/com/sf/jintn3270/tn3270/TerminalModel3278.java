@@ -24,7 +24,6 @@ public class TerminalModel3278 extends TerminalModel {
 		opts[1] = new TerminalType();
 		opts[2] = new SuppressGA();
 		opts[3] = new EndOfRecord();
-//		opts[0] = new Tn3270e();
 	}
 	
 	
