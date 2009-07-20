@@ -194,7 +194,7 @@ public abstract class TerminalModel {
 	/**
 	 * Prints the given byte at the current cursor location.
 	 */
-	public void print(byte b) {
+	public void print(short b) {
 		CursorPosition before = (CursorPosition)cursor.clone();
 		
 		print(charFact.get(b));
@@ -205,7 +205,7 @@ public abstract class TerminalModel {
 	 * Prints the given array of bytes, starting at offset, up to length, at 
 	 * the current cursor location.
 	 */
-	public void print(byte[] bytes, int offset, int length) {
+	public void print(short[] bytes, int offset, int length) {
 		CursorPosition before = (CursorPosition)cursor.clone();
 		
 		for (int pos = offset; pos < (offset + length); pos++) {
@@ -217,7 +217,7 @@ public abstract class TerminalModel {
 	/**
 	 * Prints the given array of bytes at the current cursor location.
 	 */
-	public void print(byte[] bytes) {
+	public void print(short[] bytes) {
 		print(bytes, 0, bytes.length);
 	}
 	

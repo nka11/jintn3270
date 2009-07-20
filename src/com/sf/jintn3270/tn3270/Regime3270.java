@@ -20,7 +20,7 @@ import java.io.OutputStream;
  * 
  */
 public class Regime3270 extends Option {
-	public static final byte REGIME = (byte)29;
+	public static final short REGIME = 29;
 	
 	/** The stream where binary data is written */
 	OutputStream parserStream;
@@ -46,7 +46,7 @@ public class Regime3270 extends Option {
 		return "3270 Regime";
 	}
 	
-	public byte getCode() {
+	public short getCode() {
 		return REGIME;
 	}
 	
@@ -63,7 +63,7 @@ public class Regime3270 extends Option {
 	 * is not a telnet IAC to a 3270 stream handler. Otherwise, we'll continue
 	 * to process things as a normal NVT.
 	 */
-	public int consumeIncomingBytes(byte[] incoming, TelnetClient client) {
+	public int consumeIncoming(short[] incoming, TelnetClient client) {
 		int read = 0;
 		if (incoming[0] == client.IAC &&
 			incoming[1] == client.SB &&
@@ -83,12 +83,12 @@ public class Regime3270 extends Option {
 			if (iacIndex == 0) {
 				read = 0;
 			} else {
-				byte[] regime = new byte[(iacIndex - 1) - 4];
+				short[] regime = new short[(iacIndex - 1) - 4];
 				System.arraycopy(incoming, 4, regime, 0, regime.length);
 				
 				// Convert to string, without getting encoding exceptions.
 				StringBuffer sb = new StringBuffer();
-				for (byte b : regime) {
+				for (short b : regime) {
 					sb.append((char)b);
 				}
 				String regimeName = sb.toString();
@@ -114,11 +114,11 @@ public class Regime3270 extends Option {
 				read = 4 + regime.length + 2;
 			}
 		} else if (binaryHandler != null) { // If we've installed a BINARY handler, pass along that data!
-			read = binaryHandler.consumeIncomingBytes(incoming, client);
+			read = binaryHandler.consumeIncoming(incoming, client);
 			
-			byte[] remaining = new byte[incoming.length - read];
+			short[] remaining = new short[incoming.length - read];
 			System.arraycopy(incoming, read + 1, remaining, 0, remaining.length);
-			read += eor.consumeIncomingBytes(remaining, client);
+			read += eor.consumeIncoming(remaining, client);
 		}
 		return read;
 	}
@@ -127,12 +127,12 @@ public class Regime3270 extends Option {
 	 * If we're enabled, defer to our parent.
 	 * If we're not enabled, then we never have anything to write.
 	 */
-	public byte[] outgoingBytes(ByteArrayOutputStream toSend, TelnetClient client) {
+	public short[] outgoing(ByteArrayOutputStream queuedForOutput, TelnetClient client) {
 		// If we're not enabled, we never send.
 		if (!isEnabled()) {
 			return nill;
 		}
-		return super.outgoingBytes(toSend, client);
+		return super.outgoing(queuedForOutput, client);
 	}
 	
 	
@@ -142,7 +142,7 @@ public class Regime3270 extends Option {
 		// Once we're enabled, we send a subcommand to negotiate our regime
 		if (isEnabled()) {
 			try {
-				out.write(new byte[] {client.IAC, client.SB, ARE});
+				out.write(new short[] {IAC, SB, ARE});
 				String[] names = client.getTerminalModel().getModelName();
 				for (int i = 0; i < names.length; i++) {
 					out.write(names[i].getBytes("ASCII"));
@@ -150,7 +150,7 @@ public class Regime3270 extends Option {
 						out.write((byte)' ');
 					}
 				}
-				out.write(new byte[] {client.IAC, client.SE});
+				out.write(new short[] {IAC, SE});
 			} catch (IOException ioe) {
 				System.out.println("Error writing negotiation subcommand\n" + ioe.toString());
 			}

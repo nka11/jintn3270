@@ -21,8 +21,8 @@ public class Echo extends Option {
 		return "Echo";
 	}
 	
-	public byte getCode() {
-		return (byte)1;
+	public short getCode() {
+		return 1;
 	}
 	
 	public void initiate(TelnetClient client) {

@@ -10,7 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class Tn3270e extends Option implements TelnetConstants {
-	public static final byte TN3270E = (byte)40;
+	public static final short TN3270E = 40;
 	
 	public enum Command {
 		ASSOCIATE, 
@@ -52,7 +52,7 @@ public class Tn3270e extends Option implements TelnetConstants {
 		return "Tn3270e";
 	}
 	
-	public byte getCode() {
+	public short getCode() {
 		return TN3270E;
 	}
 	
@@ -60,12 +60,12 @@ public class Tn3270e extends Option implements TelnetConstants {
 	public void initiate(TelnetClient client) {
 	}
 	
-	public int consumeIncomingBytes(byte[] incoming, TelnetClient client) {
+	public int consumeIncoming(short[] incoming, TelnetClient client) {
 		System.out.println("Non-subcommand, bytes remaining: " + incoming.length);
 		return 0;
 	}
 	
-	public int consumeIncomingSubcommand(byte[] incoming, TelnetClient client) {
+	public int consumeIncomingSubcommand(short[] incoming, TelnetClient client) {
 		// TODO: Look for IAC, SE.
 		int length = 0;
 		for (int i = 0; i < incoming.length - 1; i++) {
@@ -79,9 +79,9 @@ public class Tn3270e extends Option implements TelnetConstants {
 			if (incoming[3] == Command.SEND.ordinal() && incoming[4] == Command.DEVICE_TYPE.ordinal()) {
 				try {
 					System.out.println("Sending DEVICE_TYPE");
-					out.write(new byte[] {IAC, SB, (byte)Command.DEVICE_TYPE.ordinal(), (byte)Command.REQUEST.ordinal()});
+					out.write(new short[] {IAC, SB, (short)Command.DEVICE_TYPE.ordinal(), (short)Command.REQUEST.ordinal()});
 					out.write(((client.getTerminalModel().getModelName())[0]).getBytes("ASCII"));
-					out.write(new byte[] {IAC, SE});
+					out.write(new short[] {IAC, SE});
 				} catch (IOException ioe) {
 					System.out.println("Failed to send Device Type response.");
 				}
@@ -94,18 +94,18 @@ public class Tn3270e extends Option implements TelnetConstants {
 	 * If we're enabled, defer to our parent.
 	 * If we're not enabled, then we never have anything to write.
 	 */
-	public byte[] outgoingBytes(ByteArrayOutputStream toSend, TelnetClient client) {
+	public short[] outgoing(ByteArrayOutputStream queuedForSend, TelnetClient client) {
 		// If we're not enabled, we never send.
 		if (!isEnabled()) {
 			return nill;
 		}
-		return super.outgoingBytes(toSend, client);
+		return super.outgoing(queuedForSend, client);
 	}
 	
 	/**
 	 * Resolves a byte to an Enumeration Value.
 	 */
-	private Enum resolveValue(byte ordinal, Class<? extends Enum> type) {
+	private Enum resolveValue(short ordinal, Class<? extends Enum> type) {
 		for (Object e : EnumSet.allOf(type)) {
 			if (ordinal == ((Enum)e).ordinal()) {
 				return (Enum)e;

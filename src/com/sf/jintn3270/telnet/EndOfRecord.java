@@ -12,36 +12,34 @@ import com.sf.jintn3270.TerminalModel;
  * then consumed by this option.
  */
 public class EndOfRecord extends Option {
-	public static final byte EOR = (byte)25; // End of Record.
-	
-	byte[] markEOR;
+	static final short EOR = 239;
+	static final short[] markEOR = new short[] {IAC, EOR};
 	
 	public EndOfRecord() {
 		super();
-		markEOR = new byte[] {TelnetClient.IAC, EOR};
 	}
 	
 	public String getName() {
 		return "EndOfRecord";
 	}
 	
-	public byte getCode() {
-		return EOR;
+	public short getCode() {
+		return 25;
 	}
 	
 	public void initiate(TelnetClient client) {
 		client.sendWill(getCode());
 	}
 	
-	public byte[] outgoingBytes(ByteArrayOutputStream toSend, TelnetClient client) {
-		byte[] ret = nill;
-		if (isEnabled() && toSend.size() > 0) {
+	public short[] outgoing(ByteArrayOutputStream queuedForSend, TelnetClient client) {
+		short[] ret = nill;
+		if (isEnabled() && queuedForSend.size() > 0) {
 			ret = markEOR;
 		}
 		return ret;
 	}
 	
-	public int consumeIncomingBytes(byte[] incoming, TelnetClient client) {
+	public int consumeIncoming(short[] incoming, TelnetClient client) {
 		if (incoming[0] == TelnetClient.IAC && incoming[1] == EOR) {
 			return 2;
 		}

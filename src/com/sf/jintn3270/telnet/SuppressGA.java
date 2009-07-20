@@ -10,7 +10,7 @@ import java.io.ByteArrayOutputStream;
  * When SuppressGA is disabled, GA's are sent with every outgoing frame.
  */
 public class SuppressGA extends Option {
-	byte[] cmdGA = new byte[] {TelnetClient.IAC, TelnetClient.GA};
+	short[] cmdGA = new short[] {TelnetClient.IAC, TelnetClient.GA};
 	
 	public SuppressGA() {
 		super();
@@ -20,16 +20,16 @@ public class SuppressGA extends Option {
 		return "Suppress GA";
 	}
 	
-	public byte getCode() {
-		return (byte)3;
+	public short getCode() {
+		return 3;
 	}
 	
 	public void initiate(TelnetClient client) {
 		client.sendWill(getCode());
 	}
 	
-	public byte[] outgoingBytes(ByteArrayOutputStream toSend, TelnetClient client) {
-		if (!isEnabled() && toSend.size() > 0) {
+	public short[] outgoing(ByteArrayOutputStream queuedForSend, TelnetClient client) {
+		if (!isEnabled() && queuedForSend.size() > 0) {
 			return cmdGA;
 		}
 		return nill;

@@ -10,28 +10,27 @@ public class DefaultCharacterFactory implements CharacterFactory {
 		chars[0] = new DefaultTerminalCharacter(0, ' ');
 	}
 	
-	public TerminalCharacter get(byte code) {
+	public TerminalCharacter get(short code) {
 		return get((int)code);
 	}
 	
 	public TerminalCharacter get(char c) {
-		return get((byte)c);
+		return get((int)c);
 	}
 	
 	public TerminalCharacter get(int code) {
-		if (code < 0) {
-			code += 256;
-		}
 		return chars[code];
 	}
 	
+	
+	
 	class DefaultTerminalCharacter extends TerminalCharacter {
 		DefaultTerminalCharacter(int code) {
-			super((byte)code, (char)code);
+			super((short)code, (char)code);
 		}
 		
 		DefaultTerminalCharacter(int code, char c) {
-			super((byte)code, c);
+			super((short)code, c);
 		}
 	}
 }

@@ -41,6 +41,7 @@ public class TelnetClient extends Thread implements TelnetConstants {
 	Socket sock = null;
 	BufferedInputStream inStream;
 	
+	UByteOutputStream outWriter;
 	ByteArrayOutputStream outStream;
 	
 	AbstractQueue<Option> options;
@@ -84,6 +85,7 @@ public class TelnetClient extends Thread implements TelnetConstants {
 			options.add(o);
 		}
 		outStream = new ByteArrayOutputStream();
+		outWriter = new UByteOutputStream(outStream);
 	}
 	
 	
@@ -108,6 +110,8 @@ public class TelnetClient extends Thread implements TelnetConstants {
 		if (sock != null) {
 			sock.setKeepAlive(true);
 			inStream = new BufferedInputStream(sock.getInputStream(), sock.getReceiveBufferSize());
+			// TODO: Determine if we really need to do this.
+			//outStream.write((byte)0xCC); // Signal Endianess
 			connected();
 		}
 	}
@@ -124,6 +128,7 @@ public class TelnetClient extends Thread implements TelnetConstants {
 				sock = null;
 			}
 		}
+		outStream.reset();
 		disconnected();
 	}
 	
@@ -198,23 +203,20 @@ public class TelnetClient extends Thread implements TelnetConstants {
 	/**
 	 * Send the given byte to the remote host.
 	 */
-	public void send(byte b) {
-		try {
-			// If we're using send to send 255, we need to escape it.
-			if (b == IAC) {
-				outStream.write(new byte[] {IAC, IAC});
-			} else {
-				outStream.write(b);
-			}
-		} catch (IOException e) {}
+	public void send(short b) {
+		// If we're using send to send 255, we need to escape it.
+		if (b == IAC) {
+			outWriter.write(new short[] {IAC, IAC});
+		} else {
+			outWriter.write(b);
+		}
 	}
 	
 	/**
 	 * Send the outgoing non-command bytes
 	 */
-	public void send(byte[] bytes) {
-		// Look for 255 in the stream
-		for (byte b : bytes) {
+	public void send(short[] bytes) {
+		for (short b : bytes) {
 			send(b);
 		}
 	}
@@ -223,56 +225,46 @@ public class TelnetClient extends Thread implements TelnetConstants {
 	/**
 	 * Sends the outgoing byte preceeded by an IAC marker
 	 */
-	public void sendCommand(byte b) {
-		sendCommand(new byte[] {b});
+	public void sendCommand(short b) {
+		sendCommand(new short[] {b});
 	}
 	
 	/**
 	 * Sends the outgoing bytes preceeded by an IAC marker.
 	 */
-	public void sendCommand(byte[] commandBytes) {
-		byte[] toSend = new byte[commandBytes.length + 1];
+	public void sendCommand(short[] commandBytes) {
+		short[] toSend = new short[commandBytes.length + 1];
 		toSend[0] = IAC;
 		System.arraycopy(commandBytes, 0, toSend, 1, commandBytes.length);
-		try {
-			outStream.write(toSend);
-		} catch (IOException e) {} ;
+		outWriter.write(toSend);
 	}
 	
 	/**
 	 * Writes a DO option to the output buffer
 	 */
-	public void sendDo(byte code) {
-		try {
-			outStream.write(new byte[] {IAC, DO, code});
-		} catch (IOException e) {}
+	public void sendDo(short code) {
+		outWriter.write(new short[] {IAC, DO, code});
 	}
 	
 	/**
 	 * Writes a WILL option to the output buffer.
 	 */
-	public void sendWill(byte code) {
-		try {
-			outStream.write(new byte[] {IAC, WILL, code});
-		} catch (IOException e) {}
+	public void sendWill(short code) {
+		outWriter.write(new short[] {IAC, WILL, code});
 	}
 	
 	/**
 	 * Writes a DONT option to the output buffer.
 	 */
-	public void sendDont(byte code) {
-		try {
-			outStream.write(new byte[] {IAC, DONT, code});
-		} catch (IOException e) {}
+	public void sendDont(short code) {
+		outWriter.write(new short[] {IAC, DONT, code});
 	}
 	
 	/**
 	 * Writes a WONT option to the output buffer.
 	 */
-	public void sendWont(byte code) {
-		try {
-			outStream.write(new byte[] {IAC, WONT, code});
-		} catch (IOException e) {}
+	public void sendWont(short code) {
+		outWriter.write(new short[] {IAC, WONT, code});
 	}
 	
 	
@@ -288,7 +280,7 @@ public class TelnetClient extends Thread implements TelnetConstants {
 	 * @param incoming The bytes coming in from the buffer.
 	 * @return The number of bytes consumed in this pass.
 	 */
-	private int consumeIncomingBytes(byte[] incoming) {
+	private int consumeIncoming(short[] incoming) {
 		int read = 0;
 		if (incoming[0] == IAC) {
 			if (incoming.length >= 2) {
@@ -296,7 +288,7 @@ public class TelnetClient extends Thread implements TelnetConstants {
 					case IAC: // Handle escaped 255. we leave 'read' at 0 so this will be passed along.
 						// Trim the first byte.
 						System.arraycopy(incoming, 1, incoming, 0, incoming.length - 1);
-						incoming[incoming.length - 1] = (byte)0x00;
+						incoming[incoming.length - 1] = 0;
 						break;
 					case WILL: // Option Offered! Send do or don't.
 						if (incoming.length >= 3) {
@@ -385,7 +377,7 @@ public class TelnetClient extends Thread implements TelnetConstants {
 			// For any enabled options, let's try them.
 			for (Option o : options) {
 				if (o.isEnabled()) {
-					read += o.consumeIncomingBytes(incoming, this);
+					read += o.consumeIncoming(incoming, this);
 				}
 			}
 		}
@@ -394,7 +386,7 @@ public class TelnetClient extends Thread implements TelnetConstants {
 		// next IAC, or the end of the buffer, and we'll treat that as 
 		// if it's data for display.
 		if (read == 0) {
-			for (byte b : incoming) {
+			for (short b : incoming) {
 				if (b == IAC) {
 					break;
 				}
@@ -413,13 +405,12 @@ public class TelnetClient extends Thread implements TelnetConstants {
 	private byte[] outgoingBytes() {
 		// collect all options outgoing bytes.
 		for (Option o : options) {
-			try {
-				outStream.write(o.outgoingBytes(outStream, this));
-			} catch (IOException ioe) {
-			}
+			outWriter.write(o.outgoing(outStream, this));
 		}
 		
-		// append any of ours.
+		// TODO: append any of ours.
+		
+		// Convert to byte[] array for writing.
 		byte[] out = outStream.toByteArray();
 		outStream.reset();
 		
@@ -455,7 +446,7 @@ public class TelnetClient extends Thread implements TelnetConstants {
 					
 					// Determine how many bytes (if any) we've successfully
 					// consumed in this pass.
-					consumed = consumeIncomingBytes(buf);
+					consumed = consumeIncoming(fromUByte(buf));
 					
 					// reset the stream mark, then skip past the consumed bytes.
 					inStream.reset();
@@ -479,6 +470,13 @@ public class TelnetClient extends Thread implements TelnetConstants {
 		}
 	}
 	
+	private static short[] fromUByte(byte[] b) {
+		short[] ret = new short[b.length];
+		for (int i = 0; i < b.length; i++) {
+			ret[i] = (short)(b[i] & 0xff);
+		}
+		return ret;
+	}
 	
 	/**
 	 * Simple Test Harness

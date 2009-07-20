@@ -10,8 +10,13 @@ import java.io.ByteArrayOutputStream;
  * subcommand processing, terminal decoding, and even protocol I/O to any 
  * options which are enabled.
  */
-public abstract class Option {
-	protected ByteArrayOutputStream out;
+public abstract class Option implements TelnetConstants {
+	// TODO: Keep output as a Context for a TelnetClient. This is currently - NOT - thread  / multi-TelnetClient safe.
+	
+	/** Used to write unsigned shorts to the output buffer */
+	protected UByteOutputStream out;
+	/** Used to buffer the output from the Option for collection by a TelnetClient **/
+	protected ByteArrayOutputStream outBuf;
 	
 	private boolean enabled;
 	
@@ -19,12 +24,13 @@ public abstract class Option {
 	 * Can be returned by outgoingBytes by subclasses that never send data
 	 * to the remote host.
 	 */
-	protected byte[] nill;
+	protected short[] nill;
 	
 	protected Option() {
 		enabled = false;
-		nill = new byte[0];
-		out = new ByteArrayOutputStream();
+		nill = new short[0];
+		outBuf = new ByteArrayOutputStream();
+		out = new UByteOutputStream(outBuf);
 	}
 	
 	
@@ -37,7 +43,7 @@ public abstract class Option {
 	/**
 	 * Returns the Telnet Option Code
 	 */
-	public abstract byte getCode();
+	public abstract short getCode();
 	
 	
 	/**
@@ -48,23 +54,32 @@ public abstract class Option {
 	
 	
 	/**
-	 * Potentially handle incoming bytes.
+	 * Potentially handle incoming data.
 	 *
-	 * @param incoming The byte[] array that may be an entire frame or 
+	 * @param incoming The short[] array that may be an entire frame or 
 	 * partial frame of data. 
 	 * @param client The TelnetClient which has received the data.
-	 * @return The number of bytes consumed by reading from the beginning of 
-	 *         <code>incoming</code>. If no bytes were read, return 0. If the
-	 *         bytes starting at <code>incoming[0]</code> are not understood
+	 * @return The number of shorts consumed by reading from the beginning of 
+	 *         <code>incoming</code>. If no shorts were read, return 0. If the
+	 *         shorts starting at <code>incoming[0]</code> are not understood
 	 *         by this option, then we should return 0 and read nothing. Only 
-	 *         return non-zero if the bytes starting at the beginning of the 
+	 *         return non-zero if the shorts starting at the beginning of the 
 	 *         buffer are actionable by this Option.
 	 */
-	public int consumeIncomingBytes(byte[] incoming, TelnetClient client) {
+	public int consumeIncoming(short[] incoming, TelnetClient client) {
 		return 0;
 	}
 	
-	public int consumeIncomingSubcommand(byte[] incoming, TelnetClient client) {
+	/**
+	 * handle the incoming data.
+	 * 
+	 * @param incoming The short[] array that may be an entire frame or 
+	 * partial frame of data.
+	 * @param client the TelnetClient which has received the data
+	 * @return The number of shorts consumed by reading from the beginning of 
+	 *         <code>incoming</code>. If no shorts were read, return 0.
+	 */
+	public int consumeIncomingSubcommand(short[] incoming, TelnetClient client) {
 		return 0;
 	}
 	
@@ -73,10 +88,13 @@ public abstract class Option {
 	 * Retrieve the outgoing bytes from the <code>out</code> buffer and 
 	 * send it along to the client.
 	 */
-	public byte[] outgoingBytes(ByteArrayOutputStream toSend, TelnetClient client) {
-		byte[] ret = out.toByteArray();
-		out.reset();
-		return ret;
+	public short[] outgoing(ByteArrayOutputStream queuedForSend, TelnetClient client) {
+		if (outBuf.size() > 0) {
+			short[] ret = fromUByte(outBuf.toByteArray());
+			outBuf.reset();
+			return ret;
+		}
+		return nill;
 	}
 	
 	/**
@@ -96,5 +114,13 @@ public abstract class Option {
 		} else {
 			System.out.println("   DISABLED " + getName());
 		}
+	}
+	
+	protected short[] fromUByte(byte[] b) {
+		short[] ret = new short[b.length];
+		for (int i = 0; i < b.length; i++) {
+			ret[i] = (short)(b[i] & 0xff);
+		}
+		return ret;
 	}
 }

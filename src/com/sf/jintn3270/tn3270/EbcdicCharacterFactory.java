@@ -8,7 +8,7 @@ public class EbcdicCharacterFactory implements CharacterFactory {
 		
 	}
 	
-	public TerminalCharacter get(byte code) {
+	public TerminalCharacter get(short code) {
 		return null;
 	}
 	

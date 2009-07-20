@@ -2,13 +2,13 @@ package com.sf.jintn3270;
 
 public abstract class TerminalCharacter {
 	char display;
-	byte code;
+	short code;
 	
-	protected TerminalCharacter(byte code) {
+	protected TerminalCharacter(short code) {
 		this(code, (char)code);
 	}
 	
-	protected TerminalCharacter(byte code, char display) {
+	protected TerminalCharacter(short code, char display) {
 		this.code = code;
 		this.display = display;
 	}
@@ -17,7 +17,7 @@ public abstract class TerminalCharacter {
 		return display;
 	}
 	
-	public byte getCode() {
+	public short getCode() {
 		return code;
 	}
 	

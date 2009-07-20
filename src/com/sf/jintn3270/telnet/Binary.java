@@ -14,7 +14,8 @@ import com.sf.jintn3270.TerminalModel;
  * OutputStream specified during construction.
  */
 public class Binary extends Option {
-	public static final byte BINARY = (byte)0;
+	public static final short BINARY = 0;
+	
 	OutputStream binaryDestination;
 	
 	public Binary(OutputStream destination) {
@@ -26,7 +27,7 @@ public class Binary extends Option {
 		return "Binary";
 	}
 	
-	public byte getCode() {
+	public short getCode() {
 		return BINARY;
 	}
 	
@@ -36,18 +37,18 @@ public class Binary extends Option {
 	public void initiate(TelnetClient client) {}
 	
 	
-	public byte[] outgoingBytes(ByteArrayOutputStream toSend, TelnetClient client) {
+	public short[] outgoing(ByteArrayOutputStream queuedForSend, TelnetClient client) {
 		return nill;
 	}
 	
-	public int consumeIncomingBytes(byte[] incoming, TelnetClient client) {
+	public int consumeIncoming(short[] incoming, TelnetClient client) {
 		int consumed = 0;
 		if (isEnabled() && incoming.length > 0) {
 			for (int i = 0; i < incoming.length; i++) {
 				// Default -- the data is not an IAC.
 				if (incoming[i] != client.IAC) {
 					try {
-						binaryDestination.write(incoming[i]);
+						binaryDestination.write((byte)incoming[i]);
 						consumed++;
 					} catch (IOException ioe) {
 						System.err.println("Error writing binary data to destination.\n" + ioe.toString());
@@ -58,7 +59,7 @@ public class Binary extends Option {
 				           incoming[i + 1] == client.IAC) 
 				{
 					try {
-						binaryDestination.write(incoming[i]);
+						binaryDestination.write((byte)incoming[i]);
 						consumed++;
 						i++; // skip ahead.
 					} catch (IOException ioe) {

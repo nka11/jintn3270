@@ -6,6 +6,10 @@ import com.sf.jintn3270.telnet.Option;
 import com.sf.jintn3270.DefaultCharacterFactory;
 import com.sf.jintn3270.TerminalCharacter;
 
+import com.sf.jintn3270.telnet.*;
+
+import java.io.ByteArrayOutputStream;
+
 public class TerminalModel3278 extends TerminalModel {
 	TermType3278 model;
 	Option[] opts;
@@ -15,8 +19,12 @@ public class TerminalModel3278 extends TerminalModel {
 	public TerminalModel3278(TermType3278 type) {
 		super(type.rows(), type.cols(), new DefaultCharacterFactory());
 		this.model = type;
-		opts = new Option[1];
-		opts[0] = new Tn3270e();
+		opts = new Option[4];
+		opts[0] = new Binary(new ByteArrayOutputStream());
+		opts[1] = new TerminalType();
+		opts[2] = new SuppressGA();
+		opts[3] = new EndOfRecord();
+//		opts[0] = new Tn3270e();
 	}
 	
 	

@@ -14,8 +14,8 @@ import java.io.ByteArrayOutputStream;
  * current TelnetClient.
  */
 public class TerminalType extends Option {
-	static byte SEND = 1;
-	static byte IS = 0;
+	static short SEND = 1;
+	static short IS = 0;
 	
 	private int requests;
 	
@@ -28,15 +28,19 @@ public class TerminalType extends Option {
 		return "TerminalType";
 	}
 	
-	public byte getCode() {
-		return (byte)24;
+	public short getCode() {
+		return 24;
 	}
 	
 	/** Do nothing!  We never initiate. */
 	public void initiate(TelnetClient client) {
 	}
 	
-	public int consumeIncomingBytes(byte[] incoming, TelnetClient client) {
+	public int consumeIncomingSubcommand(short[] incoming, TelnetClient client) {
+		return consumeIncoming(incoming, client);
+	}
+	
+	public int consumeIncoming(short[] incoming, TelnetClient client) {
 		// Consume an IAC SB <code> SEND IAC SE
 		if (incoming[0] == client.IAC && 
 			incoming[1] == client.SB && 
@@ -47,7 +51,7 @@ public class TerminalType extends Option {
 		{
 			// Write our termtype message to our output buffer.
 			try {
-				out.write(new byte[] {client.IAC, client.SB, IS});
+				out.write(new short[] {IAC, SB, IS});
 				
 				String[] names = client.getTerminalModel().getModelName();
 				if (requests >= names.length) {
@@ -55,7 +59,8 @@ public class TerminalType extends Option {
 				} else {
 					out.write(names[requests].getBytes("ASCII"));
 				}
-				out.write(new byte[] {client.IAC, client.SE});
+				out.write(new short[] {IAC, SE});
+				System.out.println("Wrote TermType IS");
 				return 6;
 			} catch (Exception ex) {}
 		} else if (incoming[0] == client.IAC &&
