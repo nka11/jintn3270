@@ -51,7 +51,8 @@ public class TerminalType extends Option {
 		{
 			// Write our termtype message to our output buffer.
 			try {
-				out.write(new short[] {IAC, SB, IS});
+				System.out.println("Writing term type");
+				out.write(new short[] {IAC, SB, getCode(), IS});
 				
 				String[] names = client.getTerminalModel().getModelName();
 				if (requests >= names.length) {
@@ -60,7 +61,6 @@ public class TerminalType extends Option {
 					out.write(names[requests].getBytes("ASCII"));
 				}
 				out.write(new short[] {IAC, SE});
-				System.out.println("Wrote TermType IS");
 				return 6;
 			} catch (Exception ex) {}
 		} else if (incoming[0] == client.IAC &&
