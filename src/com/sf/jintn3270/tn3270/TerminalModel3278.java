@@ -14,16 +14,20 @@ public class TerminalModel3278 extends TerminalModel {
 	TermType3278 model;
 	Option[] opts;
 	
-	//TODO: Encapsulate Binary and EndOfRecord like Regime3270 does.
+	ByteArrayOutputStream dataStream;
 	
 	public TerminalModel3278(TermType3278 type) {
 		super(type.rows(), type.cols(), new DefaultCharacterFactory());
 		this.model = type;
-		opts = new Option[4];
-		opts[0] = new Binary(new ByteArrayOutputStream());
+		dataStream = new ByteArrayOutputStream();
+		
+		opts = new Option[5];
+		opts[0] = new Binary(dataStream);
 		opts[1] = new TerminalType();
 		opts[2] = new SuppressGA();
 		opts[3] = new EndOfRecord();
+		opts[4] = new Regime3270((EndOfRecord)opts[3], (Binary)opts[0]);
+//		opts[5] = new Tn3270e();
 	}
 	
 	

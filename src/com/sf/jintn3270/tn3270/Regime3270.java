@@ -22,9 +22,6 @@ import java.io.OutputStream;
 public class Regime3270 extends Option {
 	public static final short REGIME = 29;
 	
-	/** The stream where binary data is written */
-	OutputStream parserStream;
-	
 	Binary binaryHandler;
 	EndOfRecord eor;
 	
@@ -35,11 +32,10 @@ public class Regime3270 extends Option {
 	 * Create a new Regime3270 option that writes incoming binary data to the 
 	 * given destination.
 	 */
-	public Regime3270(OutputStream destination) {
+	public Regime3270(EndOfRecord eor, Binary b) {
 		super();
-		eor = new EndOfRecord();
-		binaryHandler = null;
-		parserStream = destination;
+		this.eor = eor;
+		binaryHandler = b;
 	}
 	
 	public String getName() {
@@ -97,20 +93,16 @@ public class Regime3270 extends Option {
 				// part of our Regime negotiation, then we need to consider
 				// everything coming in as 3270 binary data.
 				if (!regimeName.equals("")) {
-					binaryHandler = new Binary(parserStream);
 					binaryHandler.setEnabled(true, client);
 					eor.setEnabled(true, client);
-					
 				} else {
 					binaryHandler.setEnabled(false, client);
 					eor.setEnabled(false, client);
-					
-					binaryHandler = null;
 				}
 				
 				read = 4 + regime.length + 2;
 			}
-		} else if (binaryHandler != null) { // If we've installed a BINARY handler, pass along that data!
+		} else if (binaryHandler.isEnabled()) { // If we've installed a BINARY handler, pass along that data!
 			read = binaryHandler.consumeIncoming(incoming, client);
 			
 			short[] remaining = new short[incoming.length - read];
