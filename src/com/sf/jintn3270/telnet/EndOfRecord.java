@@ -12,7 +12,7 @@ import com.sf.jintn3270.TerminalModel;
  * then consumed by this option.
  */
 public class EndOfRecord extends Option {
-	public static final byte EOR = (byte)239; // End of Record.
+	public static final byte EOR = (byte)25; // End of Record.
 	
 	byte[] markEOR;
 	
