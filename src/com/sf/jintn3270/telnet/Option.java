@@ -16,7 +16,7 @@ public abstract class Option implements TelnetConstants {
 	/** Used to write unsigned shorts to the output buffer */
 	protected UByteOutputStream out;
 	/** Used to buffer the output from the Option for collection by a TelnetClient **/
-	protected ByteArrayOutputStream outBuf;
+	private ByteArrayOutputStream outBuf;
 	
 	private boolean enabled;
 	

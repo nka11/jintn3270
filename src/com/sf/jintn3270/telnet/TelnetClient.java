@@ -39,7 +39,7 @@ public class TelnetClient extends Thread implements TelnetConstants {
 	boolean ssl;
 	
 	Socket sock = null;
-	BufferedInputStream inStream;
+	UByteInputStream inStream;
 	
 	UByteOutputStream outWriter;
 	ByteArrayOutputStream outStream;
@@ -109,9 +109,7 @@ public class TelnetClient extends Thread implements TelnetConstants {
 		
 		if (sock != null) {
 			sock.setKeepAlive(true);
-			inStream = new BufferedInputStream(sock.getInputStream(), sock.getReceiveBufferSize());
-			// TODO: Determine if we really need to do this.
-			//outStream.write((byte)0xCC); // Signal Endianess
+			inStream = new UByteInputStream(new BufferedInputStream(sock.getInputStream(), sock.getReceiveBufferSize()));
 			connected();
 		}
 	}
@@ -429,7 +427,8 @@ public class TelnetClient extends Thread implements TelnetConstants {
 			disconnected();
 		}
 		
-		byte[] buf;
+		byte[] out;
+		short[] in;
 		int available;
 		int consumed;
  		while (sock != null && !sock.isClosed()) {
@@ -441,12 +440,12 @@ public class TelnetClient extends Thread implements TelnetConstants {
 				if (available > 0) {
 					inStream.mark(available);
 					
-					buf = new byte[available];
-					inStream.read(buf);
+					in = new short[available];
+					inStream.read(in);
 					
 					// Determine how many bytes (if any) we've successfully
 					// consumed in this pass.
-					consumed = consumeIncoming(fromUByte(buf));
+					consumed = consumeIncoming(in);
 					
 					// reset the stream mark, then skip past the consumed bytes.
 					inStream.reset();
@@ -457,9 +456,9 @@ public class TelnetClient extends Thread implements TelnetConstants {
 				
 				
 				// Do I have data to write?
-				buf = outgoingBytes();
-				if (buf.length > 0) {
-					sock.getOutputStream().write(buf);
+				out = outgoingBytes();
+				if (out.length > 0) {
+					sock.getOutputStream().write(out);
 					sock.getOutputStream().flush();
 				}
 			} catch (Exception ex) {
@@ -468,14 +467,6 @@ public class TelnetClient extends Thread implements TelnetConstants {
 			// Play nice with thread schedulers.
 			Thread.yield();
 		}
-	}
-	
-	private static short[] fromUByte(byte[] b) {
-		short[] ret = new short[b.length];
-		for (int i = 0; i < b.length; i++) {
-			ret[i] = (short)(b[i] & 0xff);
-		}
-		return ret;
 	}
 	
 	/**
