@@ -70,6 +70,7 @@ public class Binary extends Option {
 				}
 			}
 		}
+		System.out.println("Binary consuming " + consumed + " bytes"); 
 		return consumed;
 	}
 }

@@ -16,11 +16,16 @@ import java.io.IOException;
  * TODO: Allow specifying a device name, properly handle REJECT during the CONNECT phase.
  */
 public class Tn3270e extends Option implements TelnetConstants {
+	public static final int MODE_3270 = 0;
+	public static final int MODE_NVT = 5;
+
 	EndOfRecord eor;
 	Binary binary;
 	
 	String deviceType;
 	String deviceName;
+	
+	private int dataMode;
 	
 	ArrayList<Function> requestedFunctions;
 	
@@ -66,6 +71,8 @@ public class Tn3270e extends Option implements TelnetConstants {
 		this.binary = b;
 		
 		requestedFunctions = new ArrayList<Function>();
+		
+		dataMode = -1;
 	}
 	
 	public String getName() {
@@ -81,12 +88,58 @@ public class Tn3270e extends Option implements TelnetConstants {
 	}
 	
 	public int consumeIncoming(short[] incoming, TelnetClient client) {
-		System.out.println("Non-subcommand, bytes remaining: " + incoming.length);
-		
-		
-		
-		
-		
+		System.out.println("incoming length: " + incoming.length);
+		// If the binary option is enabled, we've negotiated the stream
+		// successfully, and need to look for 3270 frames.
+		if (dataMode != -1) {
+			// frame must consist of at least <5-byte header> IAC EOR
+			if (incoming.length >= 7) {
+				int dataEnd = 0;
+				boolean found = false;
+				for (; dataEnd < incoming.length - 1 && !found; dataEnd++) {
+					if (incoming[dataEnd] == IAC &&
+					    incoming[dataEnd + 1] == eor.EOR)
+					{
+						found = true;
+					}
+				}
+				
+				// If we find an EOR record, then we process the frame.
+				if (found) {
+					System.out.println("Found IAC, EOR at: " + dataEnd);
+					
+					// Parse the 5-byte header.
+					short dataType = incoming[0];
+					short requestFlag = incoming[1];
+					short responseFlag = incoming[2];
+					int sequence = incoming[3] << 8 | incoming[4];
+					
+					// Basic 3270e requires only supporting dataType in 3270 and NVT modes.
+					
+					if (dataType != dataMode) {
+						// TODO: Switch data modes from 3270 to NVT or 
+						// from NVT to 3270
+					}
+					System.out.println("Data Length: " + (incoming.length - 7));
+					short[] dataFrame = new short[incoming.length - 7];
+					System.arraycopy(incoming, 5, dataFrame, 0, dataFrame.length);
+					
+					if (dataType == MODE_3270) {
+						// Send 3270 Binary option to be parsed
+						binary.setEnabled(true, client);
+						binary.consumeIncoming(dataFrame, client);
+						binary.setEnabled(false, client);
+					} else if (dataType == MODE_NVT) {
+						// Render NVT data directly to the model.
+						client.getTerminalModel().print(dataFrame);
+					}
+					
+					System.out.println("Consumed 3270 data: " + (dataEnd + 1) + " bytes");
+					return dataEnd + 1;
+				}
+			}
+		}
+		// Otherwise, there's not enough data to process this as a frame.
 		return 0;
 	}
 	
@@ -174,9 +227,7 @@ public class Tn3270e extends Option implements TelnetConstants {
 				}
 				if (match) {
 					System.out.println("FUNCTIONS IS matched!");
-					binary.setEnabled(true, client);
-					eor.setEnabled(true, client);
-					// TODO: What do we do when we're matched?
+					dataMode = MODE_3270;
 				} else {
 					System.out.println("FUNCTIONS IS did NOT match!");
 					requestedFunctions = proposed;
@@ -222,4 +273,7 @@ public class Tn3270e extends Option implements TelnetConstants {
 		}
 		return null;
 	}
+	
+	
+	
 }

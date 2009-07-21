@@ -12,8 +12,8 @@ import com.sf.jintn3270.TerminalModel;
  * then consumed by this option.
  */
 public class EndOfRecord extends Option {
-	static final short EOR = 239;
-	static final short[] markEOR = new short[] {IAC, EOR};
+	public static final short EOR = 239;
+	public static final short[] markEOR = new short[] {IAC, EOR};
 	
 	public EndOfRecord() {
 		super();
