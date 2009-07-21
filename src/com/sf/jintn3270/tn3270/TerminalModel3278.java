@@ -16,18 +16,22 @@ public class TerminalModel3278 extends TerminalModel {
 	
 	ByteArrayOutputStream dataStream;
 	
+	/**
+	 * Creates a new TerminalModel3278 with the proper default screen size,
+	 * required Telnet Options, character factory, and 3270 parser.
+	 */
 	public TerminalModel3278(TermType3278 type) {
 		super(type.rows(), type.cols(), new DefaultCharacterFactory());
 		this.model = type;
 		dataStream = new ByteArrayOutputStream();
 		
-		opts = new Option[5];
+		opts = new Option[6];
 		opts[0] = new Binary(dataStream);
 		opts[1] = new TerminalType();
 		opts[2] = new SuppressGA();
 		opts[3] = new EndOfRecord();
 		opts[4] = new Regime3270((EndOfRecord)opts[3], (Binary)opts[0]);
-//		opts[5] = new Tn3270e();
+		opts[5] = new Tn3270e((EndOfRecord)opts[3], (Binary)opts[0]);
 	}
 	
 	

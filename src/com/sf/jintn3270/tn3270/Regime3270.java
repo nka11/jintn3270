@@ -102,12 +102,6 @@ public class Regime3270 extends Option {
 				
 				read = 4 + regime.length + 2;
 			}
-		} else if (binaryHandler.isEnabled()) { // If we've installed a BINARY handler, pass along that data!
-			read = binaryHandler.consumeIncoming(incoming, client);
-			
-			short[] remaining = new short[incoming.length - read];
-			System.arraycopy(incoming, read + 1, remaining, 0, remaining.length);
-			read += eor.consumeIncoming(remaining, client);
 		}
 		return read;
 	}

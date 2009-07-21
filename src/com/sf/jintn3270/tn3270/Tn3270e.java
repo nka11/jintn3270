@@ -1,5 +1,7 @@
 package com.sf.jintn3270.tn3270;
 
+import com.sf.jintn3270.telnet.Binary;
+import com.sf.jintn3270.telnet.EndOfRecord;
 import com.sf.jintn3270.telnet.Option;
 import com.sf.jintn3270.telnet.TelnetClient;
 import com.sf.jintn3270.telnet.TelnetConstants;
@@ -10,6 +12,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class Tn3270e extends Option implements TelnetConstants {
+	EndOfRecord eor;
+	Binary binary;
+	
 	public static final short TN3270E = 40;
 	
 	public enum Command {
@@ -44,8 +49,10 @@ public class Tn3270e extends Option implements TelnetConstants {
 	};
 	
 	
-	public Tn3270e() {
+	public Tn3270e(EndOfRecord eor, Binary b) {
 		super();
+		this.eor = eor;
+		this.binary = b;
 	}
 	
 	public String getName() {
@@ -66,7 +73,6 @@ public class Tn3270e extends Option implements TelnetConstants {
 	}
 	
 	public int consumeIncomingSubcommand(short[] incoming, TelnetClient client) {
-		// TODO: Look for IAC, SE.
 		int length = 0;
 		for (int i = 0; i < incoming.length - 1; i++) {
 			if (incoming[i] == IAC && incoming[i + 1] == SE) {
@@ -78,8 +84,8 @@ public class Tn3270e extends Option implements TelnetConstants {
 			System.out.println("Subcommand: " + resolveValue(incoming[3], Command.class) + " " + resolveValue(incoming[4], Command.class));
 			if (incoming[3] == Command.SEND.ordinal() && incoming[4] == Command.DEVICE_TYPE.ordinal()) {
 				try {
-					System.out.println("Sending DEVICE_TYPE");
-					out.write(new short[] {IAC, SB, (short)Command.DEVICE_TYPE.ordinal(), (short)Command.REQUEST.ordinal()});
+					System.out.println("Sending DEVICE_TYPE REQUEST");
+					out.write(new short[] {IAC, SB, getCode(), (short)Command.DEVICE_TYPE.ordinal(), (short)Command.REQUEST.ordinal()});
 					out.write(((client.getTerminalModel().getModelName())[0]).getBytes("ASCII"));
 					out.write(new short[] {IAC, SE});
 				} catch (IOException ioe) {
