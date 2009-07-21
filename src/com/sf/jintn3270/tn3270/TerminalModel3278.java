@@ -25,13 +25,16 @@ public class TerminalModel3278 extends TerminalModel {
 		this.model = type;
 		dataStream = new ByteArrayOutputStream();
 		
+		Binary binary = new Binary(dataStream);
+		EndOfRecord eor = new EndOfRecord();
+		
 		opts = new Option[6];
-		opts[0] = new Binary(dataStream);
-		opts[1] = new TerminalType();
-		opts[2] = new SuppressGA();
-		opts[3] = new EndOfRecord();
-		opts[4] = new Regime3270((EndOfRecord)opts[3], (Binary)opts[0]);
-		opts[5] = new Tn3270e((EndOfRecord)opts[3], (Binary)opts[0]);
+		opts[0] = new SuppressGA();
+		opts[1] = new Tn3270e(eor, binary);
+		opts[2] = new Regime3270(eor, binary);
+		opts[3] = new TerminalType();
+		opts[4] = binary;
+		opts[5] = eor;
 	}
 	
 	
