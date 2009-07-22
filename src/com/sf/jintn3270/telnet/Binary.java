@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.sf.jintn3270.TerminalModel;
+import com.sf.jintn3270.telnet.UByteOutputStream;
 
 /**
  * Implementation of RFC 856
@@ -16,9 +16,9 @@ import com.sf.jintn3270.TerminalModel;
 public class Binary extends Option {
 	public static final short BINARY = 0;
 	
-	OutputStream binaryDestination;
+	UByteOutputStream binaryDestination;
 	
-	public Binary(OutputStream destination) {
+	public Binary(UByteOutputStream destination) {
 		super();
 		this.binaryDestination = destination;
 	}
@@ -44,33 +44,40 @@ public class Binary extends Option {
 	public int consumeIncoming(short[] incoming, TelnetClient client) {
 		int consumed = 0;
 		if (isEnabled() && incoming.length > 0) {
-			for (int i = 0; i < incoming.length; i++) {
-				// Default -- the data is not an IAC.
-				if (incoming[i] != client.IAC) {
-					try {
-						binaryDestination.write((byte)incoming[i]);
-						consumed++;
-					} catch (IOException ioe) {
-						System.err.println("Error writing binary data to destination.\n" + ioe.toString());
-					}
-				// If we run into IAC, IAC, deliver just the single instance of IAC as decoded binary.
-				} else if (incoming[i] == client.IAC &&
-					      i + 1 < incoming.length && // avoids IndexOutOfBoundsException, ensures there's at least two bytes remaining.
-				           incoming[i + 1] == client.IAC) 
+			// Deliver as much data to the target stream at once as possible.
+			// To do this, we'll search the incoming buffer for IACs.
+			boolean foundCommand = false;
+			int endFrame = 0;
+			int trim = 0;
+			for (; endFrame < (incoming.length - trim) && !foundCommand; endFrame++) {
+				if (incoming[endFrame] == IAC &&
+				    endFrame < incoming.length &&
+			         incoming[endFrame + 1] != IAC)
 				{
-					try {
-						binaryDestination.write((byte)incoming[i]);
-						consumed++;
-						i++; // skip ahead.
-					} catch (IOException ioe) {
-						System.err.println("Error writing binary data to destination.\n" + ioe.toString());
-					}
-				} else { // We == IAC, but either we're at the end of the available data, or the next byte is not an escaped 255, but a real IAC.
-					break;
+					// We found an IAC before the end of the buffer that's not an escaped 255.
+					foundCommand = true;
+				} else if (
+					incoming[endFrame] == IAC &&
+					endFrame < incoming.length &&
+					incoming[endFrame + 1] == IAC)
+				{
+					// We found an IAC IAC. THis is an escaped value 255.
+					System.arraycopy(incoming, endFrame + 1, incoming, endFrame, incoming.length - endFrame - 1);
+					trim++;
 				}
 			}
+			
+			// If we trimmed, update the incoming buffer reference.
+			if (trim > 0) {
+				short[] trimmed = new short[incoming.length - trim];
+				System.arraycopy(incoming, 0, trimmed, 0, trimmed.length);
+				incoming = trimmed;
+			}
+			
+			binaryDestination.write(incoming, 0, endFrame);
+			
+			consumed = endFrame;
 		}
-		System.out.println("Binary consuming " + consumed + " bytes"); 
 		return consumed;
 	}
 }

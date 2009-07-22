@@ -11,23 +11,20 @@ public class UByteOutputStream extends FilterOutputStream {
 	
 	public void write(short[] s) {
 		try {
-			out.write(toUByte(s));
+			write(toUByte(s));
 		} catch (IOException ioe) {
 		}
 	}
 	
 	public void write(short[] s, int off, int len) {
 		try {
-			out.write(toUByte(s), off, len);
+			write(toUByte(s), off, len);
 		} catch (IOException ioe) {
 		}
 	}
 	
 	public void write(short s) {
-		try {
-			out.write((byte)s);
-		} catch (IOException ioe) {
-		}
+		write((byte)s);
 	}
 	
 	/**

@@ -260,7 +260,7 @@ public class Tn3270e extends Option implements TelnetConstants {
 				}
 				if (match) {
 					dataMode = MODE_3270;
-				} else {
+				} else {	
 					requestedFunctions = proposed;
 					requestFunctions();
 				}

@@ -14,7 +14,7 @@ public class TerminalModel3278 extends TerminalModel {
 	TermType3278 model;
 	Option[] opts;
 	
-	ByteArrayOutputStream dataStream;
+	StreamDecoder decoder;
 	
 	/**
 	 * Creates a new TerminalModel3278 with the proper default screen size,
@@ -23,9 +23,10 @@ public class TerminalModel3278 extends TerminalModel {
 	public TerminalModel3278(TermType3278 type) {
 		super(type.rows(), type.cols(), new DefaultCharacterFactory());
 		this.model = type;
-		dataStream = new ByteArrayOutputStream();
 		
-		Binary binary = new Binary(dataStream);
+		decoder = new StreamDecoder(this);
+		
+		Binary binary = new Binary(decoder);
 		EndOfRecord eor = new EndOfRecord();
 		
 		opts = new Option[6];
