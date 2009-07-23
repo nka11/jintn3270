@@ -4,7 +4,6 @@ import com.sf.jintn3270.TerminalModel;
 import com.sf.jintn3270.telnet.Option;
 
 import com.sf.jintn3270.CursorPosition;
-import com.sf.jintn3270.DefaultCharacterFactory;
 import com.sf.jintn3270.TerminalCharacter;
 
 import com.sf.jintn3270.telnet.*;
