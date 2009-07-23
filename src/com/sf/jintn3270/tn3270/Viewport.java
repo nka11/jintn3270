@@ -31,4 +31,20 @@ public class Viewport {
 		this.width = width;
 		this.height = height;
 	}
+	
+	public int getRow() {
+		return row;
+	}
+	
+	public int getCol() {
+		return col;
+	}
+	
+	public int getWidth() {
+		return width;
+	}
+	
+	public int getHeight() {
+		return height;
+	}
 }

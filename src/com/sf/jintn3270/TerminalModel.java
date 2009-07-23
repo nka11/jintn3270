@@ -15,15 +15,14 @@ import com.sf.jintn3270.telnet.Option;
  * data into the buffer.
  */
 public abstract class TerminalModel {
-	TerminalCharacter[][] buffer;
+	private int bufferWidth;
+	private int bufferHeight;
 	
-	CharacterFactory charFact;
+	private CharacterFactory charFact;
 	
-	CursorPosition cur;
+	private TelnetClient client;
 	
-	TelnetClient client;
-	
-	boolean localEcho;
+	private boolean localEcho;
 	
 	protected EventListenerList listenerList = new EventListenerList();
 	
@@ -34,10 +33,11 @@ public abstract class TerminalModel {
 	 */
 	protected TerminalModel(int rows, int cols, CharacterFactory charFact) {
 		this.charFact = charFact;
-		this.cur = new CursorPosition(rows, cols);
 		this.client = null;
 		this.localEcho = false;
-		initializeBuffer(rows, cols);
+		this.bufferWidth = cols;
+		this.bufferHeight = rows;
+		reset();
 	}
 	
 	/**
@@ -55,21 +55,25 @@ public abstract class TerminalModel {
 	}
 	
 	/**
+	 * Re-Initialize the buffer and cursor
+	 */
+	public void reset() {
+		initializeBuffer(bufferHeight, bufferWidth);
+		initializeCursor(bufferHeight, bufferWidth);
+	}
+	
+	/**
 	 * Initializes the buffer by allocate a new buffer array, then filling
 	 * the array with the character mapped to byte 0x00
 	 */
-	protected void initializeBuffer(int rows, int cols) {
-		buffer = new TerminalCharacter[rows][cols];
-		cursor().row = 0;
-		cursor().column = 0;
-		byte b = 0;
-		for (int row = 0; row < buffer.length; row++) {
-			for (int col = 0; col < buffer[row].length; col++) {
-				buffer[row][col] = charFact.get(b);
-			}
-		}
-		fire(new TerminalEvent(this, TerminalEvent.BUFFER_CHANGED));
-	}
+	protected abstract void initializeBuffer(int rows, int cols);
+	
+	
+	/**
+	 * Initialize the CursorPosition
+	 */
+	protected abstract void initializeCursor(int rows, int cols);
+	
 	
 	
 	public void setClient(TelnetClient client) {
@@ -117,7 +121,7 @@ public abstract class TerminalModel {
 		CursorPosition before = (CursorPosition)cursor().clone();
 		
 		if (localEcho) {
-			buffer[cursor().row()][cursor().column()] = charFact.get(c);
+			buffer()[cursor().row()][cursor().column()] = charFact.get(c);
 			cursor().right();
 		}
 		if (isConnected()) {
@@ -137,7 +141,7 @@ public abstract class TerminalModel {
 		CursorPosition before = (CursorPosition)cursor().clone();
 		
 		cursor().left();
-		buffer[cursor().row()][cursor().column()] = charFact.get((byte)0);
+		buffer()[cursor().row()][cursor().column()] = charFact.get((byte)0);
 		
 		fire(TerminalEvent.BUFFER_UPDATE, (CursorPosition)cursor().clone(), before);
 	}
@@ -148,10 +152,10 @@ public abstract class TerminalModel {
 	 */
 	public void eraseLine() {
 		CursorPosition before = (CursorPosition)cursor().clone();
-		before.column = buffer[0].length - 1;
+		before.column = buffer()[0].length - 1;
 		
-		for (int col = 0; col < buffer[cursor().row()].length; col++) {
-			buffer[cursor().row()][col] = charFact.get((byte)0);
+		for (int col = 0; col < buffer()[cursor().row()].length; col++) {
+			buffer()[cursor().row()][col] = charFact.get((byte)0);
 		}
 		cursor().column = 0;
 		fire(TerminalEvent.BUFFER_UPDATE, (CursorPosition)cursor().clone(), before);
@@ -165,10 +169,19 @@ public abstract class TerminalModel {
 	 *
 	 * @return The CursorPosition used by this terminal.
 	 */
-	public CursorPosition cursor() {
-		return cur;
-	}
+	public abstract CursorPosition cursor();
 	
+	/**
+	 * Obtains the TerminalCharacter array used as the display buffer.
+	 *
+	 * @return the TerminalCharacter buffer.
+	 */
+	public abstract TerminalCharacter[][] buffer();
+	
+	
+	public CharacterFactory characterFactory() {
+		return charFact;
+	}
 	
 	/**
 	 * Moves the current Cursor to the given position
@@ -198,7 +211,7 @@ public abstract class TerminalModel {
 		}
 		
 		if (display) {
-			buffer[cursor().row()][cursor().column()] = ch;
+			buffer()[cursor().row()][cursor().column()] = ch;
 			cursor().right();
 		}
 	}
@@ -259,7 +272,7 @@ public abstract class TerminalModel {
 	 * Returns the height (number of rows) in the buffer
 	 */
 	public int getBufferHeight() {
-		return buffer.length;
+		return bufferHeight;
 	}
 	
 	
@@ -267,7 +280,7 @@ public abstract class TerminalModel {
 	 * Returns the width (number of columns) in the buffer
 	 */
 	public int getBufferWidth() {
-		return buffer[0].length;
+		return bufferWidth;
 	}
 	
 	
@@ -275,6 +288,6 @@ public abstract class TerminalModel {
 	 * Gets the given char at the given location in the buffer.
 	 */
 	public TerminalCharacter getChar(int row, int col) {
-		return buffer[row][col];
+		return buffer()[row][col];
 	}
 }

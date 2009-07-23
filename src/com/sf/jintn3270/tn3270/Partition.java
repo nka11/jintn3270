@@ -1,5 +1,6 @@
 package com.sf.jintn3270.tn3270;
 
+import com.sf.jintn3270.CursorPosition;
 import com.sf.jintn3270.TerminalCharacter;
 
 /**
@@ -19,6 +20,8 @@ public class Partition {
 	
 	Viewport view;
 	
+	CursorPosition cur;
+	
 	/**
 	 * Constructs the implicit partition
 	 */
@@ -30,6 +33,8 @@ public class Partition {
 		this.pid = pid;
 		this.rows = rows;
 		this.cols = cols;
+		
+		cur = new CursorPosition(rows, cols);
 		
 		buffer = new TerminalCharacter[rows][cols];
 		visibleContent = new Window(0, 0, cols, rows);
@@ -52,11 +57,15 @@ public class Partition {
 		return buffer;
 	}
 	
+	public CursorPosition cursor() {
+		return cur;
+	}
+	
 	/**
 	 * Apply the window bounds to the buffer and return the portion of the 
 	 * buffer that is to be displayed by the viewport.
 	 */
-	private TerminalCharacter[][] getvisibleContentBuffer() {
+	public TerminalCharacter[][] getVisibleContentBuffer() {
 		// If the window is the same size as us, then just return the buffer.
 		if (getWindow().left() == 0 &&
 		    getWindow().right() == cols &&
@@ -81,5 +90,13 @@ public class Partition {
 	
 	public Window getWindow() {
 		return this.visibleContent;
+	}
+	
+	public void setViewport(Viewport v) {
+		this.view = v;
+	}
+	
+	public Viewport getViewport() {
+		return this.view;
 	}
 }
