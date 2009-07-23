@@ -22,8 +22,13 @@
 		<div><img src="swing_nvt.png"></div>
 		
 		<p>At this time, development is beginning to focus on IBM-3278-4-E 
-		terminal support. Once the negotiation stage of RFC 1647 is complete,
-		the 3270 stream parser will be receiving lots of attention.</p>
+		terminal support. The current code in subversion will initialize a TerminalModel, 
+		negotiate the most advanced method of obtaining a 3270 data stream 
+		based on Telnet Options 3270e, Regime, and the union of Binary, EOR, 
+		and TermType as a fall-back. This kicks the host communication into 
+		Binary streams of 3270 data. The parser is moving along, as is the 
+		TerminalModel and associated objects being used to model the stream
+		as in-memory objects.</p>
 		
 		<h2>The following RFC's have been implemented in a client-side capacity.</h2>
 		<p>
@@ -34,16 +39,28 @@
 				<li>Suppress GA - <a href="http://www.faqs.org/rfcs/rfc858.html">RFC 858</a></li>
 				<li>TerminalType - <a href="http://www.faqs.org/rfcs/rfc884.html">RFC 884</a></li>
 				<li>End Of Record - <a href="http://www.faqs.org/rfcs/rfc885.html">RFC 885</a></li>
+				<li>TN3270 Regime - <a href="http://www.faqs.org/rfcs/rfc1041.html">RFC 1041</a></li>
+				<li>TN3270e - <a href="http://www.faqs.org/rfcs/rfc1647.html">RFC 1647</a> (Basic TN3270e Only)</li>
 			</ul>
 		</p>
 		
-		<h2>The following RFC's are actively being implemented.</h2>
-		<p>
+		<h2>The following functions / features are missing from the above RFC's</h2>
+		<p>The TN3270e option does not (yet) support the following:
 			<ul>
-				<li>TN3270 Regime - <a href="http://www.faqs.org/rfcs/rfc1041.html">RFC 1041</a></li>
-				<li>TN3270e - <a href="http://www.faqs.org/rfcs/rfc1647.html">RFC 1647</a></li>
+				<li>Binding to a named device, rather than the generic pool.</li>
+				<li>Association of printer devices.</li>
+				<li>The following function implementations (support is planned)
+					<ul>
+					<li>SCS_CTL_CODES</li>
+					<li>DATA_STREAM_CTL</li>
+					<li>RESPONSES</li>
+					<li>BIND_IMAGE</li>
+					<li>SYSREQ</li>
+					</ul>
+				</li>
 			</ul>
 		<hr>
+		
 		<a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=265288&amp;type=5" width="210" height="62" border="0" alt="SourceForge.net Logo" /></a>
 	</body>
 </html>
