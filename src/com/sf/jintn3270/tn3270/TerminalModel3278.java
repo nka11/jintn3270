@@ -12,6 +12,28 @@ import com.sf.jintn3270.telnet.*;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 
+/**
+ * TerminalModel3278 - A TN3270e TerminalModel.
+ * 
+ * <p>This TerminalModel subclass encapsulates the necessary classes and 
+ * and functions required to implement a 3270e compatible terminal. The model
+ * expresses serveral Telnet Options as "Required", which really just means
+ * that those options are available as dependencies, and that the TelnetClient
+ * will be instructed to initiate negotiation.
+ * <ul><li>Suppress Go Ahead</li>
+ *     <li>Tn3270e</li>
+ *     <li>Regime3270</li>
+ *     <li>TerminalType</li>
+ *     <li>Binary (for receiving the 3270 data stream)</li>
+ *     <li>End Of Record</li>
+ * </ul>
+ * 
+ * <p>As per Chapter 2 of the 3270 Data Stream Programmer's Reference,
+ * this TerminalModel handles implicit and explicit Partitions. The initial 
+ * state of the terminal is a single implicit partition with a PID of 0 (zero).
+ * <p>
+ * 
+ */
 public class TerminalModel3278 extends TerminalModel {
 	TermType3278 model;
 	Option[] opts;
@@ -65,6 +87,10 @@ public class TerminalModel3278 extends TerminalModel {
 	
 	void addPartition(Partition p) {
 		partitions.put(p.getPid(), p);
+	}
+	
+	void removePartition(int pid) {
+		partitions.remove(pid);
 	}
 	
 	void setActivePartition(int pid) {
@@ -126,7 +152,6 @@ public class TerminalModel3278 extends TerminalModel {
 		System.out.print(ch.getDisplay());
 		System.out.flush();
 	}
-	
 	
 	
 	/**
