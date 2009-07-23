@@ -4,15 +4,13 @@ import com.sf.jintn3270.CharacterFactory;
 import com.sf.jintn3270.TerminalCharacter;
 
 public class EbcdicCharacterFactory implements CharacterFactory {
-	public EbcdicCharacterFactory() {
-		
-	}
+	public EbcdicCharacterFactory() {}
 	
 	public TerminalCharacter get(short code) {
-		return null;
+		return new TNCharacter(code);
 	}
 	
 	public TerminalCharacter get(char c) {
-		return null;
+		return new TNCharacter(c);
 	}
 }

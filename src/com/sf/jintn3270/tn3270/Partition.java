@@ -46,6 +46,11 @@ public class Partition {
 		cur = new CursorPosition(rows, cols);
 		
 		buffer = new TerminalCharacter[rows][cols];
+		for (int r = 0; r < buffer.length; r++) {
+			for (int c = 0; c < buffer[r].length; c++) {
+				buffer[r][c] = new TNCharacter((short)0);
+			}
+		}
 		visibleContent = new Window(0, 0, cols, rows);
 		view = new Viewport(pid, 0, 0, cols, rows);
 	}

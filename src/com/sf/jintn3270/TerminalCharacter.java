@@ -1,8 +1,8 @@
 package com.sf.jintn3270;
 
 public abstract class TerminalCharacter {
-	char display;
-	short code;
+	protected char display;
+	protected short code;
 	
 	protected TerminalCharacter(short code) {
 		this(code, (char)code);

@@ -48,7 +48,7 @@ public class TerminalModel3278 extends TerminalModel {
 	 * required Telnet Options, character factory, and 3270 parser.
 	 */
 	public TerminalModel3278(TermType3278 type) {
-		super(type.rows(), type.cols(), new DefaultCharacterFactory());
+		super(type.rows(), type.cols(), new EbcdicCharacterFactory());
 		this.model = type;
 		
 		decoder = new StreamDecoder(this);
@@ -115,7 +115,6 @@ public class TerminalModel3278 extends TerminalModel {
 		if (partitions.size() == 1 && 
 		    activePartition == 0)
 		{
-			System.out.println("Returning partition 0 buffer");
 			return getActivePartition().getVisibleContentBuffer();
 		}
 		
