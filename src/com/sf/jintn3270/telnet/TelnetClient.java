@@ -206,7 +206,11 @@ public class TelnetClient extends Thread implements TelnetConstants {
 		if (b == IAC) {
 			outWriter.write(new short[] {IAC, IAC});
 		} else {
-			outWriter.write(b);
+			try {
+				outWriter.write(b);
+			} catch (IOException ioe) {
+				System.err.println(ioe.toString());
+			}
 		}
 	}
 	

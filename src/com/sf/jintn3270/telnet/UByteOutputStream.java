@@ -23,10 +23,6 @@ public class UByteOutputStream extends FilterOutputStream {
 		}
 	}
 	
-	public void write(short s) {
-		write((byte)s);
-	}
-	
 	/**
 	 * Converts Java 'short' array types to unsigned byte equivalents.
 	 */

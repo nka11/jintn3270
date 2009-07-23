@@ -19,7 +19,7 @@ public abstract class TerminalModel {
 	
 	CharacterFactory charFact;
 	
-	CursorPosition cursor;
+	CursorPosition cur;
 	
 	TelnetClient client;
 	
@@ -34,7 +34,7 @@ public abstract class TerminalModel {
 	 */
 	protected TerminalModel(int rows, int cols, CharacterFactory charFact) {
 		this.charFact = charFact;
-		this.cursor = new CursorPosition();
+		this.cur = new CursorPosition(rows, cols);
 		this.client = null;
 		this.localEcho = false;
 		initializeBuffer(rows, cols);
@@ -60,8 +60,8 @@ public abstract class TerminalModel {
 	 */
 	protected void initializeBuffer(int rows, int cols) {
 		buffer = new TerminalCharacter[rows][cols];
-		cursor.row = 0;
-		cursor.column = 0;
+		cursor().row = 0;
+		cursor().column = 0;
 		byte b = 0;
 		for (int row = 0; row < buffer.length; row++) {
 			for (int col = 0; col < buffer[row].length; col++) {
@@ -114,17 +114,17 @@ public abstract class TerminalModel {
 	 * for transmission
 	 */
 	public void type(char c) {
-		CursorPosition before = (CursorPosition)cursor.clone();
+		CursorPosition before = (CursorPosition)cursor().clone();
 		
 		if (localEcho) {
-			buffer[cursor.row()][cursor.column()] = charFact.get(c);
-			cursor.right();
+			buffer[cursor().row()][cursor().column()] = charFact.get(c);
+			cursor().right();
 		}
 		if (isConnected()) {
 			client.send(charFact.get(c).getCode());
 		}
 		
-		fire(TerminalEvent.BUFFER_CHANGED, (CursorPosition)cursor.clone(), before);
+		fire(TerminalEvent.BUFFER_CHANGED, (CursorPosition)cursor().clone(), before);
 	}
 	
 	/**
@@ -134,12 +134,12 @@ public abstract class TerminalModel {
 	 * This would be like a 'backspace'.
 	 */
 	public void eraseChar() {
-		CursorPosition before = (CursorPosition)cursor.clone();
+		CursorPosition before = (CursorPosition)cursor().clone();
 		
-		cursor.left();
-		buffer[cursor.row()][cursor.column()] = charFact.get((byte)0);
+		cursor().left();
+		buffer[cursor().row()][cursor().column()] = charFact.get((byte)0);
 		
-		fire(TerminalEvent.BUFFER_UPDATE, (CursorPosition)cursor.clone(), before);
+		fire(TerminalEvent.BUFFER_UPDATE, (CursorPosition)cursor().clone(), before);
 	}
 	
 	/**
@@ -147,14 +147,14 @@ public abstract class TerminalModel {
 	 * entire line to 0x00, then moves the cursor to column 0.
 	 */
 	public void eraseLine() {
-		CursorPosition before = (CursorPosition)cursor.clone();
+		CursorPosition before = (CursorPosition)cursor().clone();
 		before.column = buffer[0].length - 1;
 		
-		for (int col = 0; col < buffer[cursor.row()].length; col++) {
-			buffer[cursor.row()][col] = charFact.get((byte)0);
+		for (int col = 0; col < buffer[cursor().row()].length; col++) {
+			buffer[cursor().row()][col] = charFact.get((byte)0);
 		}
-		cursor.column = 0;
-		fire(TerminalEvent.BUFFER_UPDATE, (CursorPosition)cursor.clone(), before);
+		cursor().column = 0;
+		fire(TerminalEvent.BUFFER_UPDATE, (CursorPosition)cursor().clone(), before);
 	}
 	
 	
@@ -166,7 +166,19 @@ public abstract class TerminalModel {
 	 * @return The CursorPosition used by this terminal.
 	 */
 	public CursorPosition cursor() {
-		return cursor;
+		return cur;
+	}
+	
+	
+	/**
+	 * Moves the current Cursor to the given position
+	 */
+	public void moveCursorTo(int row, int column) {
+		CursorPosition before = (CursorPosition)cursor().clone();
+		
+		cursor().row = row;
+		cursor().column = column;
+		fire(TerminalEvent.CURSOR_MOVED, before, cursor());
 	}
 	
 	
@@ -177,17 +189,17 @@ public abstract class TerminalModel {
 	protected void print(TerminalCharacter ch) {
 		boolean display = true;
 		if (ch.getDisplay() == '\n') {
-			cursor.down();
+			cursor().down();
 			display = false;
 		}
 		if (ch.getDisplay() == '\r') {
-			cursor.column = 0;
+			cursor().column = 0;
 			display = false;
 		}
 		
 		if (display) {
-			buffer[cursor.row()][cursor.column()] = ch;
-			cursor.right();
+			buffer[cursor().row()][cursor().column()] = ch;
+			cursor().right();
 		}
 	}
 	
@@ -195,10 +207,10 @@ public abstract class TerminalModel {
 	 * Prints the given byte at the current cursor location.
 	 */
 	public void print(short b) {
-		CursorPosition before = (CursorPosition)cursor.clone();
+		CursorPosition before = (CursorPosition)cursor().clone();
 		
 		print(charFact.get(b));
-		fire(TerminalEvent.BUFFER_UPDATE, before, cursor);
+		fire(TerminalEvent.BUFFER_UPDATE, before, cursor());
 	}
 	
 	/**
@@ -206,12 +218,12 @@ public abstract class TerminalModel {
 	 * the current cursor location.
 	 */
 	public void print(short[] bytes, int offset, int length) {
-		CursorPosition before = (CursorPosition)cursor.clone();
+		CursorPosition before = (CursorPosition)cursor().clone();
 		
 		for (int pos = offset; pos < (offset + length); pos++) {
 			print(charFact.get(bytes[pos]));
 		}
-		fire(TerminalEvent.BUFFER_UPDATE, before, cursor);
+		fire(TerminalEvent.BUFFER_UPDATE, before, cursor());
 	}
 	
 	/**
@@ -264,89 +276,5 @@ public abstract class TerminalModel {
 	 */
 	public TerminalCharacter getChar(int row, int col) {
 		return buffer[row][col];
-	}
-	
-	
-	/**
-	 * CursorPosition is closely tied to the buffer.
-	 */
-	public class CursorPosition implements Cloneable {
-		private int row;
-		private int column;
-		
-		public CursorPosition() {
-			this.row = 0;
-			this.column = 0;
-		}
-		
-		// Copy Constructor
-		CursorPosition(int row, int column) {
-			this.row = row;
-			this.column = column;
-		}
-		
-		public void moveTo(int row, int column) {
-			CursorPosition before = new CursorPosition(row, column);
-			
-			this.row = row;
-			this.column = column;
-			fire(TerminalEvent.CURSOR_MOVED, before, this);
-		}
-		
-		public int row() {
-			return row;
-		}
-		
-		public int column() {
-			return column;
-		}
-		
-		/**
-		 * Gets the position as if it were being used to index a linear buffer.
-		 */
-		public int getPosition() {
-			return (row * buffer[0].length) + column;
-		}
-		
-		
-		public void left() {
-			column--;
-			if (column < 0) {
-				column = buffer[0].length - 1;
-				up();
-			}
-		}
-		
-		
-		public void up() {
-			row--;
-			if (row < 0) {
-				row = buffer.length - 1;
-			}
-		}
-		
-		
-		public void right() {
-			column++;
-			if (column >= buffer[0].length) {
-				column = 0;
-				down();
-			}
-		}
-		
-		
-		public void down() {
-			row++;
-			if (row >= buffer.length) {
-				row = 0;
-			}
-		}
-		
-		/**
-		 * Implements cloneable.
-		 */
-		public Object clone() {
-			return new CursorPosition(row, column);
-		}
 	}
 }

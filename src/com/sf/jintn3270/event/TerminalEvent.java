@@ -2,6 +2,7 @@ package com.sf.jintn3270.event;
 
 import java.util.EventObject;
 
+import com.sf.jintn3270.CursorPosition;
 import com.sf.jintn3270.TerminalModel;
 
 public class TerminalEvent extends EventObject {
@@ -9,8 +10,8 @@ public class TerminalEvent extends EventObject {
 	public static final int BUFFER_UPDATE = 1;
 	public static final int CURSOR_MOVED = 2;
 	
-	TerminalModel.CursorPosition start;
-	TerminalModel.CursorPosition end;
+	CursorPosition start;
+	CursorPosition end;
 	
 	private int id;
 	
@@ -18,7 +19,7 @@ public class TerminalEvent extends EventObject {
 		this(source, id, null, null);
 	}
 	
-	public TerminalEvent(Object source, int id, TerminalModel.CursorPosition start, TerminalModel.CursorPosition end) {
+	public TerminalEvent(Object source, int id, CursorPosition start, CursorPosition end) {
 		super(source);
 		this.id = id;
 		this.start = start;
@@ -29,11 +30,11 @@ public class TerminalEvent extends EventObject {
 		return id;
 	}
 	
-	public TerminalModel.CursorPosition getStart() {
+	public CursorPosition getStart() {
 		return start;
 	}
 	
-	public TerminalModel.CursorPosition getEnd() {
+	public CursorPosition getEnd() {
 		return end;
 	}
 }

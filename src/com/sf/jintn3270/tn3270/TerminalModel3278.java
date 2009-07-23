@@ -9,12 +9,16 @@ import com.sf.jintn3270.TerminalCharacter;
 import com.sf.jintn3270.telnet.*;
 
 import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
 
 public class TerminalModel3278 extends TerminalModel {
 	TermType3278 model;
 	Option[] opts;
 	
 	StreamDecoder decoder;
+	
+	HashMap<Integer, Partition> partitions;
+	int activePartition;
 	
 	/**
 	 * Creates a new TerminalModel3278 with the proper default screen size,
@@ -23,6 +27,9 @@ public class TerminalModel3278 extends TerminalModel {
 	public TerminalModel3278(TermType3278 type) {
 		super(type.rows(), type.cols(), new DefaultCharacterFactory());
 		this.model = type;
+		partitions = new HashMap<Integer, Partition>();
+		addPartition(new Partition(getBufferHeight(), getBufferWidth()));
+		activePartition = 0;
 		
 		decoder = new StreamDecoder(this);
 		
@@ -38,7 +45,6 @@ public class TerminalModel3278 extends TerminalModel {
 		opts[5] = eor;
 	}
 	
-	
 	public String[] getModelName() {
 		return model.terminalName();
 	}
@@ -48,6 +54,14 @@ public class TerminalModel3278 extends TerminalModel {
 		return opts;
 	}
 	
+	void setActivePartition(int pid) {
+		activePartition = pid;
+	}
+	
+	int getActivePartition() {
+		return activePartition;
+	}
+	
 	
 	public void print(TerminalCharacter ch) {
 		super.print(ch);
@@ -55,6 +69,10 @@ public class TerminalModel3278 extends TerminalModel {
 		System.out.flush();
 	}
 	
+	
+	void addPartition(Partition p) {
+		partitions.put(p.getPid(), p);
+	}
 	
 	/**
 	 * Supported TerminalTypes & modes.
