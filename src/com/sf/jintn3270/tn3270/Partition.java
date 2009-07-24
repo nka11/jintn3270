@@ -28,15 +28,15 @@ public class Partition {
 	/**
 	 * Constructs the implicit partition
 	 */
-	Partition(int rows, int cols) {
-		this(0, rows, cols);
+	Partition(TerminalModel3278 model) {
+		this(0, model.getBufferHeight(), model.getBufferWidth(), model);
 	}
 	
 	/**
 	 * Constructs a new partition with the given PID and number of rows / cols 
 	 * in it's presentation space.
 	 */
-	public Partition(int pid, int rows, int cols) {
+	public Partition(int pid, int rows, int cols, TerminalModel3278 model) {
 		this.pid = pid;
 		this.rows = rows;
 		this.cols = cols;
@@ -48,7 +48,7 @@ public class Partition {
 		buffer = new TerminalCharacter[rows][cols];
 		for (int r = 0; r < buffer.length; r++) {
 			for (int c = 0; c < buffer[r].length; c++) {
-				buffer[r][c] = new TNCharacter((short)0);
+				buffer[r][c] = model.characterFactory().get((short)0);
 			}
 		}
 		visibleContent = new Window(0, 0, cols, rows);

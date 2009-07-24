@@ -76,7 +76,7 @@ public class TerminalModel3278 extends TerminalModel {
 	
 	public void initializeBuffer(int rows, int cols) {
 		partitions = new HashMap<Integer, Partition>();
-		addPartition(new Partition(getBufferHeight(), getBufferWidth()));
+		addPartition(new Partition(this));
 		activePartition = 0;
 	}
 	
