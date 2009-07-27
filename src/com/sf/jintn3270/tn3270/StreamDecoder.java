@@ -2,8 +2,13 @@ package com.sf.jintn3270.tn3270;
 
 import com.sf.jintn3270.telnet.UByteOutputStream;
 
+import com.sf.jintn3270.tn3270.stream.*;
+
 import java.io.IOException;
 import java.io.OutputStream;
+
+import java.util.HashMap;
+
 
 /**
  * StreamParser reads data being written to it (it's an OutputStream, afterall)
@@ -11,27 +16,27 @@ import java.io.OutputStream;
  * TerminalModel3278 it's constructed to control.
  */
 public class StreamDecoder extends UByteOutputStream {
-	/* 3270 Commands */
-	private static final int READ_MODIFIED_ALL = 0x6e;
-	private static final int ERASE_ALL_UNPROTECTED = 0x6f;
-	private static final int ERASE_WRITE_ALTERNATE = 0x7e;
-	private static final int WRITE = 0xf1;
-	private static final int READ_BUFFER = 0xf2;
-	private static final int WRITE_STRUCTURED_FIELD = 0xf3;
-	private static final int ERASE_WRITE = 0xf5;
-	private static final int READ_MODIFIED = 0xf6;
-	
-	
-	
 	private TerminalModel3278 terminal;
 	
-	private int currentCommand = 0;
-	
+	private HashMap<Short, Command> commandMap;
 	
 	public StreamDecoder(TerminalModel3278 terminal) {
 		super(null);
+		commandMap = new HashMap<Short, Command>();
+		addCommand(new Write());
+		addCommand(new EraseWrite());
+		addCommand(new EraseWriteAlternate());
+		addCommand(new ReadBuffer());
+		addCommand(new ReadModified());
+		addCommand(new ReadModifiedAll());
+		addCommand(new EraseAllUnprotected());
+		addCommand(new WriteStructuredField());
 		
 		this.terminal = terminal;
+	}
+	
+	private void addCommand(Command c) {
+		commandMap.put(c.getCode(), c);
 	}
 	
 	public void close() throws IOException {
@@ -42,40 +47,27 @@ public class StreamDecoder extends UByteOutputStream {
 		return;
 	}
 	
-	public void write(byte[] b, int off, int len) throws IOException {
-		int nextByte = 0;
+	
+	public void write(short[] b) {
+		this.write(b, 0, b.length);
+	}
+	
+	
+	public void write(short[] b, int off, int len) {
+		int nextByte = off;
 		System.out.println("StreamParser received " + len  + " bytes");
 		
-		if (currentCommand == 0) {
-			currentCommand = b[nextByte++] & 0xff;
+		// We must consume the entire message.
+		while (nextByte < off + len) {
+			// Read the command.
+			short commandCode = b[nextByte];
+			Command c = commandMap.get(commandCode);
+			if (c != null) {
+				// Dispatch!
+				nextByte += c.preform(terminal, b, off, len);
+			} else {
+				System.err.println("UNKNOWN COMMAND: " + Integer.toHexString(commandCode));
+			}
 		}
-		
-		System.out.println("Processing data from Command: " + Integer.toHexString(currentCommand));
-		switch (currentCommand) {
-			case READ_MODIFIED_ALL:
-				break;
-			case ERASE_ALL_UNPROTECTED:
-				break;
-			case ERASE_WRITE_ALTERNATE:
-				break;
-			case WRITE:
-				break;
-			case READ_BUFFER:
-				break;
-			case WRITE_STRUCTURED_FIELD:
-				break;
-			case ERASE_WRITE:
-				break;
-			case READ_MODIFIED:
-				break;
-		}
-	}
-	
-	public void write(byte[] b) throws IOException {
-		write(b, 0, b.length);
-	}
-	
-	public void write(int b) throws IOException {
-		write(new byte[] {(byte)b});
 	}
 }
