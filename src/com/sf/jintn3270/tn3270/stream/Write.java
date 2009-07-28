@@ -31,7 +31,6 @@ public class Write extends Command {
 		System.out.println("" + getClass().getName() + " off: " + off + " len: " + len + " b.length: " + b.length);
 		for (int i = off; i < (len + off); i++) {
 			short code = b[i];
-			System.out.print(Integer.toHexString(code) + " ");
 			switch (code) {
 				case START_FIELD: {
 					short attribs = b[++i];
@@ -67,6 +66,8 @@ public class Write extends Command {
 				case SET_ATTRIBUTE: {
 					short attribType = b[++i];
 					short attribVal = b[++i];
+					
+					System.out.println("Set " + Integer.toHexString(attribType) + "=" + Integer.toHexString(attribVal));
 					break;
 				}
 				case MODIFY_FIELD: {
@@ -114,13 +115,12 @@ public class Write extends Command {
 					break;
 				}
 				default:
+					// Characters 0x00 through 0x3f are control characters!
 					if (code > 0x3f) {
 						model.print(b[i]);
 					}
 			}
 		}
-		System.out.print("\n");
-		System.out.flush();
 		
 		return len;
 	}

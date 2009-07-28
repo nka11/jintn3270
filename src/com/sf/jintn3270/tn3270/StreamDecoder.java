@@ -7,6 +7,9 @@ import com.sf.jintn3270.tn3270.stream.*;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import java.io.PrintWriter;
+import java.io.File;
+
 import java.util.HashMap;
 
 
@@ -16,6 +19,8 @@ import java.util.HashMap;
  * TerminalModel3278 it's constructed to control.
  */
 public class StreamDecoder extends UByteOutputStream {
+	private static int decodeFrame = 0;
+	
 	private TerminalModel3278 terminal;
 	
 	private HashMap<Short, Command> commandMap;
@@ -58,6 +63,19 @@ public class StreamDecoder extends UByteOutputStream {
 		terminal.setActivePartition(0);
 		
 		System.out.println("StreamParser received " + len  + " bytes");
+		
+		try {
+			new File("streams").mkdirs();
+			File f = new File("streams", "incoming_frame_" + (decodeFrame++) + ".txt");
+			PrintWriter output = new PrintWriter(f);
+			for (int i = off; i < off + len; i++) {
+				output.print(Integer.toHexString(b[i]) + " ");
+			}
+			output.flush();
+			output.close();
+		} catch (Exception ex) {
+		}
+		
 		
 		// We must consume the entire message.
 		while (nextByte < off + len) {

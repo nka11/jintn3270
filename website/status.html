@@ -11,6 +11,17 @@
 		
 		<h1>Status:</h1>
 		
+		<p>Emulation of IBM-3278 terminal models 2-E through 5-E is currently
+		in development. Currently the Erase/Write and Write commands have 
+		partial support, and most Orders (any that do not apply to field
+		starts or attributes) have been implemented. Essentially we can 
+		write characters to a partition, and view the results with a subclass 
+		of DefaultTerminalRenderer. This is a big first step. Now we need to 
+		properly support 3270 attributes in the object model, and spice up
+		the Renderer. Note: There is still no keyboard or output suport.</p>
+		
+		<div><img src="swing_3270_default_renderer.png"></div>
+		
 		<p>The generic Telnet NVT implementation is funtional. It consists of 
 		a functioning TelnetClient which supports pluggable abstractions for 
 		telnet Options. Along with this, for the NVT device there is a 80x24
@@ -20,15 +31,6 @@
 		implemented as a pluggable KeyMap.</p>
 		
 		<div><img src="swing_nvt.png"></div>
-		
-		<p>At this time, development is beginning to focus on IBM-3278-4-E 
-		terminal support. The current code in subversion will initialize a TerminalModel, 
-		negotiate the most advanced method of obtaining a 3270 data stream 
-		based on Telnet Options 3270e, Regime, and the union of Binary, EOR, 
-		and TermType as a fall-back. This kicks the host communication into 
-		Binary streams of 3270 data. The parser is moving along, as is the 
-		TerminalModel and associated objects being used to model the stream
-		as in-memory objects.</p>
 		
 		<h2>The following RFC's have been implemented in a client-side capacity.</h2>
 		<p>
