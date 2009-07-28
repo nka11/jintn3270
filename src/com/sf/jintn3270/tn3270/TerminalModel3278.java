@@ -80,25 +80,32 @@ public class TerminalModel3278 extends TerminalModel {
 		activePartition = 0;
 	}
 	
-	public void initializeCursor(int rows, int cols) {
-		// No-OP. creating a partition intialized the cursor for that partition.
+	public void initializeBuffer() {
+		initializeBuffer(model.rows(), model.cols());
 	}
 	
-	void addPartition(Partition p) {
+	public void initializeCursor(int rows, int cols) {
+		// No-OP. creating a partition intializes the cursor for that partition.
+	}
+	
+	
+	public void addPartition(Partition p) {
 		partitions.put(p.getPid(), p);
 	}
 	
-	void removePartition(int pid) {
+	public void removePartition(int pid) {
 		partitions.remove(pid);
 	}
 	
-	void setActivePartition(int pid) {
+	
+	public void setActivePartition(int pid) {
 		activePartition = pid;
 	}
 	
-	Partition getActivePartition() {
+	public Partition getActivePartition() {
 		return partitions.get(activePartition);
 	}
+	
 	
 	/**
 	 * Get the CursorPosition of the active partition.
@@ -106,6 +113,7 @@ public class TerminalModel3278 extends TerminalModel {
 	public CursorPosition cursor() {
 		return getActivePartition().cursor();
 	}
+	
 	
 	/**
 	 * Get the buffer for display.
@@ -144,11 +152,11 @@ public class TerminalModel3278 extends TerminalModel {
 		return buffer;
 	}
 	
-	
+	/**
+	 * Overrides the default behavior and provides specific behavior for tn3270.
+	 */
 	protected void print(TerminalCharacter ch) {
-		super.print(ch);
-		System.out.print(ch.getDisplay());
-		System.out.flush();
+		getActivePartition().print(ch);
 	}
 	
 	

@@ -55,16 +55,19 @@ public class StreamDecoder extends UByteOutputStream {
 	
 	public void write(short[] b, int off, int len) {
 		int nextByte = off;
+		terminal.setActivePartition(0);
+		
 		System.out.println("StreamParser received " + len  + " bytes");
 		
 		// We must consume the entire message.
 		while (nextByte < off + len) {
 			// Read the command.
-			short commandCode = b[nextByte];
+			short commandCode = b[nextByte++];
 			Command c = commandMap.get(commandCode);
 			if (c != null) {
 				// Dispatch!
-				nextByte += c.preform(terminal, b, off, len);
+				// TODO: Handle insufficient data cases, where the command state needs to be saved until more data is delivered to this stream.
+				nextByte += c.preform(terminal, b, nextByte, len - (nextByte - off));
 			} else {
 				System.err.println("UNKNOWN COMMAND: " + Integer.toHexString(commandCode));
 			}

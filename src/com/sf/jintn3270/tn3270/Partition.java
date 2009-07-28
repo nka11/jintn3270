@@ -14,9 +14,12 @@ public class Partition {
 	private int pid;
 	private int rows;
 	private int cols;
+	private int bufferAddress;
 	
 	private boolean waiting;
 	private boolean systemLock;
+	private boolean implicit;
+	private boolean sixteenBitAddressing;
 	
 	TerminalCharacter[][] buffer;
 	Window visibleContent;
@@ -30,6 +33,8 @@ public class Partition {
 	 */
 	Partition(TerminalModel3278 model) {
 		this(0, model.getBufferHeight(), model.getBufferWidth(), model);
+		implicit = true;
+		sixteenBitAddressing = false;
 	}
 	
 	/**
@@ -44,22 +49,34 @@ public class Partition {
 		this.systemLock = false;
 		
 		cur = new CursorPosition(rows, cols);
+		erase(model);
 		
-		buffer = new TerminalCharacter[rows][cols];
-		for (int r = 0; r < buffer.length; r++) {
-			for (int c = 0; c < buffer[r].length; c++) {
-				buffer[r][c] = model.characterFactory().get((short)0);
-			}
-		}
 		visibleContent = new Window(0, 0, cols, rows);
 		view = new Viewport(pid, 0, 0, cols, rows);
+		implicit = false;
+		sixteenBitAddressing = false;
 	}
+	
 	
 	/**
 	 * Gets the PID of this Partition
 	 */
 	public int getPid() {
 		return pid;
+	}
+	
+	/**
+	 * Returns weather or not this partition is implicit.
+	 */
+	public boolean isImplicit() {
+		return implicit;
+	}
+	
+	/**
+	 * Sets the addressing mode from 12/14 bits to 16 bit.
+	 */
+	public void setSixteenBitAddressing(boolean b) {
+		sixteenBitAddressing = b;
 	}
 	
 	/**
@@ -110,6 +127,70 @@ public class Partition {
 	public TerminalCharacter[][] getBuffer() {
 		return buffer;
 	}
+	
+	/**
+	 * Prints a character and increments the buffer address
+	 */
+	public void print(TerminalCharacter tc) {
+		buffer[bufferAddress / cols][bufferAddress % cols] = tc;
+		bufferAddress++;
+	}
+	
+	/**
+	 * Gets the current buffer address
+	 */
+	public int getBufferAddress() {
+		return bufferAddress;
+	}
+	
+	/**
+	 * Sets the current buffer address.
+	 */
+	public void setBufferAddress(int ba) {
+		this.bufferAddress = ba;
+	}
+	
+	/**
+	 * Decodes the given two bytes of data into a buffer address according
+	 * to the addressing scheme in use by this partition
+	 */
+	public int decodeAddress(short s1, short s2) {
+		int address = ((s1 << 8) | s2);
+		
+		if (sixteenBitAddressing) {
+			return address;
+		} else if ((address >> 14) == 0) { // 14 bit, uncoded mode!
+			return address;
+		} else if ((address >> 14) == 1) { // 12 bit coded mode!
+			return decode12bitAddress(s1, s2);
+		} else if ((address >> 14) == 3) { // 12 bit coded mode!
+			return decode12bitAddress(s1, s2);
+		}
+		return -1;
+	}
+	
+	private int decode12bitAddress(short s1, short s2) {
+		// Remove the first two bits.
+		s1 = (short)(s1 >> 6 << 6 ^ s1);
+		s2 = (short)(s2 >> 6 << 6 ^ s2);
+		return s1 << 6 | s2;
+	}
+	
+	
+	/**
+	 * Erase the buffer of the Partitions Presentation space, using the 
+	 * given TerminalModel as a source for a CharacterFactory.
+	 */
+	public void erase(TerminalModel3278 model) {
+		buffer = new TerminalCharacter[rows][cols];
+		for (int r = 0; r < buffer.length; r++) {
+			for (int c = 0; c < buffer[r].length; c++) {
+				buffer[r][c] = model.characterFactory().get((short)0);
+			}
+		}
+		bufferAddress = 0;
+	}
+	
 	
 	/**
 	 * Gets the cursor location of this Partition

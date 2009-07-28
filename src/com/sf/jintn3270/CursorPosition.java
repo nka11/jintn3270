@@ -41,6 +41,12 @@ public class CursorPosition implements Cloneable {
 	}
 	
 	
+	public void setPosition(int pos) {
+		row = pos / maxCol;
+		column = pos % maxCol;
+	}
+	
+	
 	public void left() {
 		column--;
 		if (column < 0) {
