@@ -170,10 +170,29 @@ public class Partition {
 	}
 	
 	private int decode12bitAddress(short s1, short s2) {
-		// Remove the first two bits.
-		s1 = (short)(s1 >> 6 << 6 ^ s1);
-		s2 = (short)(s2 >> 6 << 6 ^ s2);
-		return s1 << 6 | s2;
+		/* Remove the first two high-order bits, and combine the remainder 
+		 * into a 12bit value.
+		 * here's another more verbose method of doing this...
+		 * 
+		 * "s >> 6 << 6" shifts a value right then left 6 spaces, effectively
+		 * filling the right six bits with '0'. This retains the high-order
+		 * bits 7 and 8.
+		 * 
+		 * "^ s" NOT OR the bytes. So the high-order bits (in 7 and 8) mask 
+		 * themselves out to 0's, leaving only the 6 lower-order bits of 
+		 * interest behind. We store this into the original variable.
+		 * 
+		 * s1 = (short)(s1 >> 6 << 6 ^ s1);
+		 * s2 = (short)(s2 >> 6 << 6 ^ s2);
+		 * 
+		 * Finally, shift the first value six bits to the left (to become the 
+		 * high-order bits), OR it with the second value, and return it as an
+		 * int.
+		 * 
+		 * return s1 << 6 | s2;
+		 */
+		// Or we can do it all in one line.
+		return (s1 >> 6 << 6 ^ s1) << 6 | (s2 >> 6 << 6 ^ s2);
 	}
 	
 	
