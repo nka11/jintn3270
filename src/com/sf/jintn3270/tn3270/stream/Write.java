@@ -114,11 +114,9 @@ public class Write extends Command {
 					++i; // Unhandled at the moment.
 					break;
 				}
-				default:
-					// Characters 0x00 through 0x3f are control characters!
-					if (code > 0x3f) {
-						model.print(b[i]);
-					}
+				default: {
+					model.print(b[i]);
+				}
 			}
 		}
 		
