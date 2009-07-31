@@ -3,6 +3,8 @@ package com.sf.jintn3270.tn3270;
 import com.sf.jintn3270.CursorPosition;
 import com.sf.jintn3270.TerminalCharacter;
 
+import java.util.LinkedList;
+
 /**
  * A 3270 Display Partition
  * 
@@ -22,6 +24,8 @@ public class Partition {
 	private boolean sixteenBitAddressing;
 	
 	TerminalCharacter[][] buffer;
+	LinkedList<Field> fieldList;
+	
 	Window visibleContent;
 	
 	Viewport view;
@@ -49,6 +53,7 @@ public class Partition {
 		this.systemLock = false;
 		
 		cur = new CursorPosition(rows, cols);
+		fieldList = new LinkedList<Field>();
 		erase(model);
 		
 		visibleContent = new Window(0, 0, cols, rows);
@@ -136,6 +141,19 @@ public class Partition {
 		bufferAddress++;
 	}
 	
+	
+	/**
+	 * Adds a Start Field character.
+	 */
+	public void print(TNFieldCharacter fc) {
+		buffer[bufferAddress / cols][bufferAddress % cols] = fc;
+		if (fieldList.size() > 0) {
+			fieldList.getLast().setEnd(bufferAddress - 1);
+		}
+		fieldList.offer(new Field(fc, bufferAddress));
+		bufferAddress++;
+	}
+	
 	/**
 	 * Gets the current buffer address
 	 */
@@ -208,6 +226,7 @@ public class Partition {
 			}
 		}
 		bufferAddress = 0;
+		fieldList.clear();
 	}
 	
 	
@@ -270,5 +289,20 @@ public class Partition {
 	 */
 	public Viewport getViewport() {
 		return this.view;
+	}
+	
+	/**
+	 * Returns <code>true</code> if this Partition is managing a list of 
+	 * Fields.
+	 */
+	public boolean hasFields() {
+		return (fieldList.size() > 0);
+	}
+	
+	/**
+	 * Gets the linked list of fields for this Partition.
+	 */
+	public LinkedList<Field> getFields() {
+		return this.fieldList;
 	}
 }

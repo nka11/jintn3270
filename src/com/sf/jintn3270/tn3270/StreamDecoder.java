@@ -85,7 +85,7 @@ public class StreamDecoder extends UByteOutputStream {
 			if (c != null) {
 				// Dispatch!
 				// TODO: Handle insufficient data cases, where the command state needs to be saved until more data is delivered to this stream.
-				nextByte += c.preform(terminal, b, nextByte, len - (nextByte - off));
+				nextByte += c.execute(terminal, b, nextByte, len - (nextByte - off));
 			} else {
 				System.err.println("UNKNOWN COMMAND: " + Integer.toHexString(commandCode));
 			}

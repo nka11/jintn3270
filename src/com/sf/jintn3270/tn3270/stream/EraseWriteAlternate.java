@@ -7,7 +7,7 @@ public class EraseWriteAlternate extends Command {
 		super((short)0x7e);
 	}
 	
-	public int preform(TerminalModel3278 model, short[] b, int off, int len) {
+	protected int preform(TerminalModel3278 model, short[] b, int off, int len) {
 		System.out.println("" + getClass().getName() + " not yet implemented.");
 		return len;
 	}

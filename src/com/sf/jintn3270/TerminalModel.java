@@ -259,6 +259,13 @@ public abstract class TerminalModel {
 		}
 	}
 	
+	/**
+	 * Create and fire a new TerminalEvent to all registered listeners.
+	 */
+	protected void fire(int id) {
+		this.fire(new TerminalEvent(this, id));
+	}
+	
 	
 	/**
 	 * Create and fire a new TerminalEvent to all registered listeners

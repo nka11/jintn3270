@@ -1,6 +1,8 @@
 package com.sf.jintn3270.tn3270.stream;
 
 import com.sf.jintn3270.tn3270.TerminalModel3278;
+import com.sf.jintn3270.tn3270.TNFieldCharacter;
+import com.sf.jintn3270.tn3270.Field;
 
 /**
  * Write 3270 Command
@@ -27,18 +29,14 @@ public class Write extends Command {
 		super((short)0xf1);
 	}
 	
-	public int preform(TerminalModel3278 model, short[] b, int off, int len) {
+	protected int preform(TerminalModel3278 model, short[] b, int off, int len) {
 		System.out.println("" + getClass().getName() + " off: " + off + " len: " + len + " b.length: " + b.length);
 		for (int i = off; i < (len + off); i++) {
 			short code = b[i];
 			switch (code) {
 				case START_FIELD: {
 					short attribs = b[++i];
-					// TODO: Store the attributes in the buffer.
-					
-					// Increment the buffer address
-					model.getActivePartition().setBufferAddress(
-							model.getActivePartition().getBufferAddress() + 1);
+					model.print(new TNFieldCharacter(attribs));
 					break;
 				}
 				case START_FIELD_EXTENDED: {
@@ -117,6 +115,14 @@ public class Write extends Command {
 				default: {
 					model.print(b[i]);
 				}
+			}
+		}
+		
+		// If we have an unclosed Field, we need to set it's closed value now.
+		if (model.getActivePartition().hasFields()) {
+			Field lastField = model.getActivePartition().getFields().getLast();
+			if (!lastField.isEndSet()) {
+				lastField.setEnd(model.getActivePartition().getBufferAddress());
 			}
 		}
 		

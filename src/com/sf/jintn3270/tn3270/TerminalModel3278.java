@@ -7,6 +7,8 @@ import com.sf.jintn3270.CursorPosition;
 import com.sf.jintn3270.TerminalCharacter;
 
 import com.sf.jintn3270.telnet.*;
+import com.sf.jintn3270.event.TerminalEvent;
+import com.sf.jintn3270.tn3270.stream.Command;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
@@ -159,6 +161,43 @@ public class TerminalModel3278 extends TerminalModel {
 		getActivePartition().print(ch);
 	}
 	
+	/**
+	 * Prints the given byte
+	 */
+	public void print(short b) {
+		print(characterFactory().get(b));
+	}
+	
+	/**
+	 * Prints the given array of bytes, starting at offset, up to length
+	 */
+	public void print(short[] bytes, int offset, int length) {
+		for (int pos = offset; pos < (offset + length); pos++) {
+			print(characterFactory().get(bytes[pos]));
+		}
+	}
+	
+	/**
+	 * Prints the given array of bytes
+	 */
+	public void print(short[] bytes) {
+		print(bytes, 0, bytes.length);
+	}
+	
+	
+	/**
+	 * Implements printing of Field Starts.
+	 */
+	public void print(TNFieldCharacter fieldStart) {
+		getActivePartition().print(fieldStart);
+	}
+	
+	/**
+	 * A write command has finished.
+	 */
+	public void complete(Command c) {
+		fire(TerminalEvent.BUFFER_CHANGED);
+	}
 	
 	/**
 	 * Supported TerminalTypes & modes.

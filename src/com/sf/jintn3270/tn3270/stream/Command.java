@@ -13,5 +13,12 @@ public abstract class Command {
 		return code;
 	}
 	
-	public abstract int preform(TerminalModel3278 model, short[] b, int off, int len);
+	public int execute(TerminalModel3278 model, short[] b, int off, int len) {
+		int read = preform(model, b, off, len);
+		model.complete(this);
+		
+		return read;
+	}
+	
+	protected abstract int preform(TerminalModel3278 model, short[] b, int off, int len);
 }

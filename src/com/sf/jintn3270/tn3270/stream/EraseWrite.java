@@ -15,7 +15,7 @@ public class EraseWrite extends Command {
 	 * Details provided by 3.5.2 of IBM Document number GA23-0059-07, 
 	 * 3270 Data Stream Programmer's Reference.
 	 */
-	public int preform(TerminalModel3278 model, short[] b, int off, int len) {
+	protected int preform(TerminalModel3278 model, short[] b, int off, int len) {
 		int nextByte = off;
 		// Read the WCC!
 		WriteControlCharacter wcc = null;

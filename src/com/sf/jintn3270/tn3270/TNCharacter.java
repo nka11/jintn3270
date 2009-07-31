@@ -4,9 +4,20 @@ import java.io.UnsupportedEncodingException;
 
 import com.sf.jintn3270.TerminalCharacter;
 
+/**
+ * TNCharacter - The buffer representation of a character for 3270 terminals.
+ * 
+ * 
+ * 
+ */
 public class TNCharacter extends TerminalCharacter {
+
+	protected TNCharacter(short code, char display) {
+		super(code, display);
+	}
+
 	public TNCharacter(short code) {
-		super(code, ' ');
+		this(code, ' ');
 		
 		switch (code) {
 			case 0x00: // NUL, Null
@@ -42,7 +53,7 @@ public class TNCharacter extends TerminalCharacter {
 	}
 	
 	public TNCharacter(char ascii) {
-		super((short)0, ascii);
+		this((short)0, ascii);
 		
 		switch (ascii) {
 			case 0x00: 
