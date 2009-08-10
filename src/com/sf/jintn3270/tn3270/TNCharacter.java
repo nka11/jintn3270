@@ -18,6 +18,7 @@ public class TNCharacter extends TerminalCharacter {
 	public static final short CHARACTER_SET = 0x43;
 	public static final short TRANSPARENCY = 0x46;
 	
+	boolean attributesSet;
 	short extendedHighlight;
 	short foreground;
 	short background;
@@ -26,6 +27,7 @@ public class TNCharacter extends TerminalCharacter {
 	
 	protected TNCharacter(short code, char display) {
 		super(code, display);
+		attributesSet = false;
 		extendedHighlight = 0;
 		foreground = 0;
 		background = 0;
@@ -99,6 +101,7 @@ public class TNCharacter extends TerminalCharacter {
 	}
 	
 	public void applyAttribute(short type, short value) {
+		attributesSet = true;
 		switch (type) {
 			case ALL_ATTRIBS: {
 				extendedHighlight = 0;
@@ -129,6 +132,18 @@ public class TNCharacter extends TerminalCharacter {
 				break;
 			}
 		}
+	}
+	
+	public boolean areAttributesSet() {
+		return attributesSet;
+	}
+	
+	public void copyAttributes(TNCharacter src) {
+		extendedHighlight = src.extendedHighlight;
+		foreground = src.foreground;
+		background = src.background;
+		characterSet = src.characterSet;
+		transparency = src.transparency;
 	}
 	
 	public boolean display() {

@@ -47,7 +47,7 @@ public class TestClient extends JFrame {
 		TelnetClient client = 
 			new TelnetClient(args[0], Integer.parseInt(args[1]), 
 				Boolean.valueOf(args[2]).booleanValue(), 
-				new TerminalModel3278(TerminalModel3278.TermType3278.MODEL2));
+				new TerminalModel3278(TerminalModel3278.TermType3278.MODEL4));
 		client.start();
 		
 		TestClient frame = new TestClient(client);

@@ -102,10 +102,11 @@ public class TelnetClient extends Thread implements TelnetConstants {
 		}
 		
 		if (!ssl) {
-			sock = new Socket(host, port);
+			sock = new Socket();
 		} else {
-			sock = SSLSocketFactory.getDefault().createSocket(host, port);
+			sock = SSLSocketFactory.getDefault().createSocket();
 		}
+		sock.connect(new InetSocketAddress(host, port));
 		
 		if (sock != null) {
 			sock.setKeepAlive(true);
@@ -406,8 +407,6 @@ public class TelnetClient extends Thread implements TelnetConstants {
 			outWriter.write(o.outgoing(outStream, this));
 		}
 		
-		// TODO: append any of ours.
-		
 		// Convert to byte[] array for writing.
 		byte[] out = outStream.toByteArray();
 		outStream.reset();
@@ -421,37 +420,45 @@ public class TelnetClient extends Thread implements TelnetConstants {
 	 * we continue.
 	 */
 	public void run() {
+		byte[] out;
+		short[] in = new short[0];
+		int read;
+		int consumed;
+		
 		try {
 			connect();
+			in = new short[sock.getReceiveBufferSize()];
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			disconnected();
 		}
 		
-		byte[] out;
-		short[] in;
-		int available;
-		int consumed;
  		while (sock != null && !sock.isClosed()) {
 			try {
 				consumed = 0;
 				
-				// Do I have data to read?
-				available = inStream.available();
-				if (available > 0) {
-					inStream.mark(available);
+				// Read up to in.length before we're invalid...
+				inStream.mark(in.length);
+				
+				try {
+					read = inStream.read(in);
+				} catch (IOException ioe) {
+					read = 0;
+				}
+				
+				// Truncate the read buffer, and process it.
+				if (read > 0) {
+					short[] truncIn = new short[read];
+					System.arraycopy(in, 0, truncIn, 0, read);
 					
-					in = new short[available];
-					inStream.read(in);
-					
-					// Determine how many bytes (if any) we've successfully
-					// consumed in this pass.
-					consumed = consumeIncoming(in);
-					
-					// reset the stream mark, then skip past the consumed bytes.
-					inStream.reset();
-					if (consumed > 0) {
-						inStream.skip(consumed);
-					}
+					consumed = consumeIncoming(truncIn);
+				}
+				
+				// reset the mark, and then consume the bytes we've 
+				// processed.
+				inStream.reset();
+				if (consumed > 0) {
+					inStream.skip(consumed);
 				}
 				
 				
