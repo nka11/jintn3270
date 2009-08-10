@@ -37,7 +37,7 @@ public class EraseWrite extends Command {
 			} else {
 				model.getActivePartition().erase(model);
 				
-				// TODO: make sure the above sets all extends field and character attributes to 0x00.
+				// TODO: make sure the above sets all extended field and character attributes to 0x00.
 				
 				// TODO: Erase all field validation attributes.
 				

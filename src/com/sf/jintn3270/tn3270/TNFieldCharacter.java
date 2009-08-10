@@ -2,20 +2,23 @@ package com.sf.jintn3270.tn3270;
 
 import com.sf.jintn3270.TerminalCharacter;
 
-public class TNFieldCharacter extends TerminalCharacter {
-	short extendedFieldAttribs;
+public class TNFieldCharacter extends TNCharacter {
+	short validation;
+	short outline;
+	
+	public static final short FIELD_OUTLINE = 0xc2;
+	public static final short FIELD_VALIDATION = 0xc1;
 	
 	public static final short DISPLAY_NO_PEN_DETECTION = 0;
 	public static final short DISPLAY_PEN_DETECTION = 1;
 	public static final short INTENSE_PEN_DETECTION = 2;
 	public static final short NONDISPLAY_NO_PEN_DETECTION = 3;
 	
-	
 	public TNFieldCharacter(short code) {
 		super(code, ' ');
-		extendedFieldAttribs = 0;
+		validation = 0;
+		outline = 0;
 	}
-	
 	
 	public boolean isProtected() {
 		return (code & 0x20) == 0x20;
@@ -59,5 +62,23 @@ public class TNFieldCharacter extends TerminalCharacter {
 		// Shift right 2 bits, leaving bits 5 and 6 of the original 8 bit value.
 		// return that as a short.
 		return (short)((code >> 4 << 4 ^ code) >> 2);
+	}
+	
+	public void applyAttribute(short type, short value) {
+		super.applyAttribute(type, value);
+		switch (type) {
+			case FIELD_OUTLINE: {
+				outline = value;
+				break;
+			}
+			case FIELD_VALIDATION: {
+				validation = value;
+				break;
+			}
+		}
+	}
+	
+	public boolean display() {
+		return false;
 	}
 }

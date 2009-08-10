@@ -1,0 +1,12 @@
+This is a master TODO: List for the project. I'm keeping this versioned since
+the steno book is becoming a pain to not tear pages off. :-)
+
+TN3270E
+-------
+Named Device Binding
+Function Implementations
+	SCS-CTL-CODES
+	DATA-STREAM-CTL
+	RESPONSE
+	BIND-IMAGE
+	SYSREQ

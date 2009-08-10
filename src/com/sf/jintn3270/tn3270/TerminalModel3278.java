@@ -158,7 +158,7 @@ public class TerminalModel3278 extends TerminalModel {
 	 * Overrides the default behavior and provides specific behavior for tn3270.
 	 */
 	protected void print(TerminalCharacter ch) {
-		getActivePartition().print(ch);
+		getActivePartition().print((TNCharacter)ch);
 	}
 	
 	/**
@@ -197,6 +197,10 @@ public class TerminalModel3278 extends TerminalModel {
 	 */
 	public void complete(Command c) {
 		fire(TerminalEvent.BUFFER_CHANGED);
+		for (Field f : getActivePartition().getFields()) {
+			System.out.println(f.toString());
+		}
+		
 	}
 	
 	/**

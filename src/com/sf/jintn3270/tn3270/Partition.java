@@ -1,7 +1,7 @@
 package com.sf.jintn3270.tn3270;
 
 import com.sf.jintn3270.CursorPosition;
-import com.sf.jintn3270.TerminalCharacter;
+import com.sf.jintn3270.tn3270.TNCharacter;
 
 import java.util.LinkedList;
 
@@ -23,7 +23,7 @@ public class Partition {
 	private boolean implicit;
 	private boolean sixteenBitAddressing;
 	
-	TerminalCharacter[][] buffer;
+	TNCharacter[][] buffer;
 	LinkedList<Field> fieldList;
 	
 	Window visibleContent;
@@ -129,18 +129,31 @@ public class Partition {
 	/**
 	 * Gets the buffer of the Partitions Presentation space.
 	 */
-	public TerminalCharacter[][] getBuffer() {
+	public TNCharacter[][] getBuffer() {
 		return buffer;
 	}
 	
 	/**
 	 * Prints a character and increments the buffer address
 	 */
-	public void print(TerminalCharacter tc) {
+	public void print(TNCharacter tc) {
 		buffer[bufferAddress / cols][bufferAddress % cols] = tc;
 		bufferAddress++;
 	}
 	
+	/**
+	 * Returns the character from the given address.
+	 */
+	public TNCharacter getCharacter(int address) {
+		return buffer[address / cols][address % cols];
+	}
+	
+	/**
+	 * Returns the character at the current BufferAddress.
+	 */
+	public TNCharacter getCharacter() {
+		return buffer[bufferAddress / cols][bufferAddress % cols];
+	}
 	
 	/**
 	 * Adds a Start Field character.
@@ -219,10 +232,10 @@ public class Partition {
 	 * given TerminalModel as a source for a CharacterFactory.
 	 */
 	public void erase(TerminalModel3278 model) {
-		buffer = new TerminalCharacter[rows][cols];
+		buffer = new TNCharacter[rows][cols];
 		for (int r = 0; r < buffer.length; r++) {
 			for (int c = 0; c < buffer[r].length; c++) {
-				buffer[r][c] = model.characterFactory().get((short)0);
+				buffer[r][c] = (TNCharacter)model.characterFactory().get((short)0);
 			}
 		}
 		bufferAddress = 0;
@@ -241,7 +254,7 @@ public class Partition {
 	 * Gets the visible buffer (as viewed through the Window of the Partition 
 	 * presentation space.
 	 */
-	public TerminalCharacter[][] getVisibleContentBuffer() {
+	public TNCharacter[][] getVisibleContentBuffer() {
 		// If the window is the same size as us, then just return the buffer.
 		if (getWindow().left() == 0 &&
 		    getWindow().right() == cols &&
@@ -250,7 +263,7 @@ public class Partition {
 		{
 			return buffer;
 		} else { // Otherwise, create a new buffer for display and copy the proper data to it.
-			TerminalCharacter[][] vBuf = new TerminalCharacter[getWindow().getHeight()][getWindow().getWidth()];
+			TNCharacter[][] vBuf = new TNCharacter[getWindow().getHeight()][getWindow().getWidth()];
 			for (int r = getWindow().top(); r < getWindow().bottom(); r++) {
 				System.arraycopy(buffer[r], getWindow().left(),
 					            vBuf[r - getWindow().top()], 0, 
@@ -304,5 +317,20 @@ public class Partition {
 	 */
 	public LinkedList<Field> getFields() {
 		return this.fieldList;
+	}
+	
+	/**
+	 * Gets the Field for the given buffer address.
+	 * 
+	 * @return The Field for the given buffer address, or <code>null</code> if
+	 * there is no field for the given address.
+	 */
+	public Field getField(int bufferAddress) {
+		for (Field f : fieldList) {
+			if (bufferAddress >= f.getStart() && bufferAddress <= f.getEnd()) {
+				return f;
+			}
+		}
+		return null;
 	}
 }

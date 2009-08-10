@@ -42,18 +42,31 @@ public class Write extends Command {
 				case START_FIELD_EXTENDED: {
 					short pairs = b[++i];
 					System.out.println("SFE with " + pairs + " pairs.");
+					
+					int fieldAddress = -1; // Buffer Address of the start field character
+					int ap = 0;
+					short[][] attribs = new short[pairs - 1][2];
 					for (int p = 0; p < pairs; p++) {
-						short attribType = b[++i];
-						short attribVal = b[++i];
-						if (attribType == 0xc0) {
-							// Store this as the start field.
-							// Increment the buffer address
-							model.getActivePartition().setBufferAddress(
-									model.getActivePartition().getBufferAddress() + 1);
+						short type = b[++i];
+						short val = b[++i];
+						
+						if (type == 0xc0) {
+							fieldAddress = model.getActivePartition().getBufferAddress();
+							model.print(new TNFieldCharacter(val));
 						} else {
-							// Store this as an extend attribute.
+							attribs[ap][0] = type;
+							attribs[ap][1] = val;
+							ap++;
 						}
 					}
+					
+					// attribs now holds all the attributes for the field.
+					for (int p = 0; p < attribs.length; p++) {
+						model.getActivePartition().getCharacter(
+								fieldAddress).applyAttribute(
+										attribs[p][0], attribs[p][1]);
+					}
+					
 					break;
 				}
 				case SET_BUFFER_ADDRESS: {
@@ -65,7 +78,8 @@ public class Write extends Command {
 					short attribType = b[++i];
 					short attribVal = b[++i];
 					
-					System.out.println("Set " + Integer.toHexString(attribType) + "=" + Integer.toHexString(attribVal));
+					model.getActivePartition().getCharacter().applyAttribute(attribType, attribVal);
+					
 					break;
 				}
 				case MODIFY_FIELD: {

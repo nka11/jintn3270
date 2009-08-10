@@ -11,11 +11,28 @@ import com.sf.jintn3270.TerminalCharacter;
  * 
  */
 public class TNCharacter extends TerminalCharacter {
-
+	public static final short ALL_ATTRIBS = 0x00;
+	public static final short EXTENDED_HIGHLIGHT = 0x41;
+	public static final short FOREGROUND_COLOR = 0x42;
+	public static final short BACKGROUND_COLOR = 0x45;
+	public static final short CHARACTER_SET = 0x43;
+	public static final short TRANSPARENCY = 0x46;
+	
+	short extendedHighlight;
+	short foreground;
+	short background;
+	short characterSet;
+	short transparency;
+	
 	protected TNCharacter(short code, char display) {
 		super(code, display);
+		extendedHighlight = 0;
+		foreground = 0;
+		background = 0;
+		characterSet = 0;
+		transparency = 0;
 	}
-
+	
 	public TNCharacter(short code) {
 		this(code, ' ');
 		
@@ -79,5 +96,42 @@ public class TNCharacter extends TerminalCharacter {
 				}
 			}
 		}
+	}
+	
+	public void applyAttribute(short type, short value) {
+		switch (type) {
+			case ALL_ATTRIBS: {
+				extendedHighlight = 0;
+				foreground = 0;
+				background = 0;
+				characterSet = 0;
+				transparency = 0;
+				break;
+			}
+			case EXTENDED_HIGHLIGHT: {
+				extendedHighlight = value;
+				break;
+			}
+			case FOREGROUND_COLOR: {
+				foreground = value;
+				break;
+			}
+			case BACKGROUND_COLOR: {
+				background = value;
+				break;
+			}
+			case CHARACTER_SET: {
+				characterSet = value;
+				break;
+			}
+			case TRANSPARENCY: {
+				transparency = value;
+				break;
+			}
+		}
+	}
+	
+	public boolean display() {
+		return true;
 	}
 }
