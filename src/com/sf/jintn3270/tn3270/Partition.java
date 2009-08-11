@@ -180,6 +180,13 @@ public class Partition {
 	}
 	
 	/**
+	 * Gets the maximum buffer address
+	 */
+	public int getMaxBufferAddress() {
+		return buffer.length * buffer[0].length;
+	}
+	
+	/**
 	 * Sets the current buffer address.
 	 */
 	public void setBufferAddress(int ba) {

@@ -35,6 +35,10 @@ public class Field {
 		return endAddress - startAddress;
 	}
 	
+	public TNFieldCharacter getFieldCharacter() {
+		return c;
+	}
+	
 	public String toString() {
 		return "Field[" + startAddress + "-" + endAddress + "] " + (endSet ? "set" : "unset") + " attribs: " + Integer.toBinaryString(c.getCode());
 	}

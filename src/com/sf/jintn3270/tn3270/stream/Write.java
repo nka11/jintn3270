@@ -101,6 +101,8 @@ public class Write extends Command {
 					// TODO: Advance the current buffer address to the 
 					// position of the first character in the next 
 					// unprotected field.
+					
+					
 					break;
 				}
 				case REPEAT_TO_ADDRESS: {
@@ -136,7 +138,7 @@ public class Write extends Command {
 		if (model.getActivePartition().hasFields()) {
 			Field lastField = model.getActivePartition().getFields().getLast();
 			if (!lastField.isEndSet()) {
-				lastField.setEnd(model.getActivePartition().getBufferAddress());
+				lastField.setEnd(model.getActivePartition().getMaxBufferAddress());
 			}
 		}
 		
