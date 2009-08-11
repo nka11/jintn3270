@@ -28,7 +28,7 @@ public class TestClient extends JFrame {
 		super(tc.getHost() + ":" + tc.getPort());
 		this.client = tc;
 		
-		term = new JTerminal(tc.getTerminalModel());
+		term = new JTerminal(tc.getTerminalModel(), new TerminalRenderer3278());
 		term.setFont(Font.decode("Lucida Console-12"));
 		term.setBorder(BorderFactory.createLineBorder(Color.BLACK, 4));
 		

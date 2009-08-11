@@ -113,7 +113,7 @@ public class Write extends Command {
 						c = b[++i];
 					}
 					// Print the same data until the given address
-					while(model.getActivePartition().getBufferAddress() <= stopAddress) {
+					while(model.getActivePartition().getBufferAddress() < stopAddress) {
 						model.print(c);
 					}
 					break;

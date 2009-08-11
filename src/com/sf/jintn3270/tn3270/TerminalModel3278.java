@@ -197,10 +197,6 @@ public class TerminalModel3278 extends TerminalModel {
 	 */
 	public void complete(Command c) {
 		fire(TerminalEvent.BUFFER_CHANGED);
-		for (Field f : getActivePartition().getFields()) {
-			System.out.println(f.toString());
-		}
-		
 	}
 	
 	/**

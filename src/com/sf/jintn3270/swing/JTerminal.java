@@ -32,6 +32,10 @@ public class JTerminal extends JPanel implements TerminalEventListener {
 		this(tm, new DefaultTerminalRenderer(), km);
 	}
 	
+	public JTerminal(TerminalModel tm, TerminalRenderer rn) {
+		this(tm, rn, new DefaultTerminalKeyMap());
+	}
+	
 	public JTerminal(TerminalModel tm, TerminalRenderer rn, TerminalKeyMap km) {
 		super();
 		setFocusable(true);
