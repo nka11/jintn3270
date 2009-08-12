@@ -1,6 +1,7 @@
 package com.sf.jintn3270.tn3270.stream;
 
 import com.sf.jintn3270.tn3270.TerminalModel3278;
+import com.sf.jintn3270.tn3270.TNCharacter;
 import com.sf.jintn3270.tn3270.TNFieldCharacter;
 import com.sf.jintn3270.tn3270.Field;
 
@@ -98,10 +99,36 @@ public class Write extends Command {
 				}
 				case PROGRAM_TAB: {
 					System.out.println("PROGRAM TAB");
-					// TODO: Advance the current buffer address to the 
-					// position of the first character in the next 
-					// unprotected field.
 					
+					// TODO: Insert NULLS when we're not preceeded by a command, order, or order sequence. What the hell is that?
+					// See 4.3.7 of the Stream Programmer's Reference.
+					
+					boolean found = false;
+					while (!found) {
+						TNCharacter tc = model.getActivePartition().getCharacter();
+						if (tc instanceof TNFieldCharacter) {
+							TNFieldCharacter tfc = (TNFieldCharacter)tc;
+							if (!tfc.isProtected()) {
+								found = true;
+							}
+						}
+						
+						if (!found) {
+							if (model.getActivePartition().getBufferAddress() == model.getActivePartition().getMaxBufferAddress()) {
+								model.getActivePartition().setBufferAddress(0);
+								break;
+							}
+							model.getActivePartition().setBufferAddress(
+								model.getActivePartition().getBufferAddress() + 1);
+						}
+					}
+					
+					// If we found one, the current buffer position is the Field Attribute character.
+					// We need to set the buffer address to the first character of the field.
+					if (found) {
+						model.getActivePartition().setBufferAddress(
+							model.getActivePartition().getBufferAddress() + 1);
+					}
 					
 					break;
 				}
@@ -112,16 +139,70 @@ public class Write extends Command {
 						// TODO: Handle alternate character sets.
 						c = b[++i];
 					}
+					
+					if (stopAddress == model.getActivePartition().getBufferAddress()) {
+						// Set the start to zero and the stop to the max address...
+						model.getActivePartition().setBufferAddress(0);
+						while (model.getActivePartition().getBufferAddress() < model.getActivePartition().getMaxBufferAddress()) {
+							model.print(c);
+						}
+						model.getActivePartition().setBufferAddress(stopAddress);
+					} else if (stopAddress < model.getActivePartition().getBufferAddress()) {
+						// Fill to the end of the buffer so that the 
+						// current buffer position wraps to 0.
+						while (model.getActivePartition().getBufferAddress() != 0) {
+							model.print(c);
+						}
+					}
+					
 					// Print the same data until the given address
 					while(model.getActivePartition().getBufferAddress() < stopAddress) {
 						model.print(c);
 					}
+					
 					break;
 				}
 				case ERASE_UNPROTECTED_TO_ADDRESS: {
 					int stopAddress = model.getActivePartition().decodeAddress(b[++i], b[++i]);
-					// TODO: Store nulls in all unprotected character 
-					// locations from current address to stopAddress.
+					
+					if (stopAddress == model.getActivePartition().getBufferAddress()) {
+						// erase -all- unprotected fields.
+						model.getActivePartition().setBufferAddress(0);
+						while (model.getActivePartition().getBufferAddress() < model.getActivePartition().getMaxBufferAddress()) {
+							Field f = model.getActivePartition().getField();
+							// Make sure we have an unprotected field and that this is not the SF character...
+							if (f != null && !f.getFieldCharacter().isProtected() && model.getActivePartition().getBufferAddress() != f.getStart()) {
+								model.print((short)0);
+							} else {
+								model.getActivePartition().setBufferAddress(
+										model.getActivePartition().getBufferAddress() + 1);
+							}
+						}
+						model.getActivePartition().setBufferAddress(stopAddress);
+					} else if (stopAddress < model.getActivePartition().getBufferAddress()) {
+						// erase all unprotected to the end of the display.
+						while (model.getActivePartition().getBufferAddress() != 0) {
+							Field f = model.getActivePartition().getField();
+							if (f != null && !f.getFieldCharacter().isProtected() && model.getActivePartition().getBufferAddress() != f.getStart()) {
+								model.print((short)0);
+							} else {
+								model.getActivePartition().setBufferAddress(
+									model.getActivePartition().getBufferAddress() + 1);
+							}
+						}
+					}
+					
+					// erase everything between the current buffer position and the stopAddress.
+					while (model.getActivePartition().getBufferAddress() < stopAddress) {
+						Field f = model.getActivePartition().getField();
+						if (f != null && !f.getFieldCharacter().isProtected() && model.getActivePartition().getBufferAddress() != f.getStart()) {
+							model.print((short)0);
+						} else {
+							model.getActivePartition().setBufferAddress(
+								model.getActivePartition().getBufferAddress() + 1);
+						}
+					}
+					
 					break;
 				}
 				case GRAPHIC_ESCAPE: {

@@ -190,6 +190,9 @@ public class Partition {
 	 * Sets the current buffer address.
 	 */
 	public void setBufferAddress(int ba) {
+		if (ba > getMaxBufferAddress()) {
+			ba -= getMaxBufferAddress();
+		}
 		this.bufferAddress = ba;
 	}
 	
@@ -329,6 +332,18 @@ public class Partition {
 	 */
 	public LinkedList<Field> getFields() {
 		return this.fieldList;
+	}
+	
+	
+	
+	/**
+	 * Gets the Field for the current buffer address.
+	 * 
+	 * @return The Field for the current buffer address, or <code>null</code> if
+	 * there is no field.
+	 */
+	public Field getField() {
+		return getField(getBufferAddress());
 	}
 	
 	/**
