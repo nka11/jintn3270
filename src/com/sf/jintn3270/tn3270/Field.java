@@ -1,5 +1,12 @@
 package com.sf.jintn3270.tn3270;
 
+
+/**
+ * Defines a field in a Partition, in a 3270 terminal.
+ * 
+ * Keeps a reference to the TNFieldCharacter (attributes) of the field,
+ * as well as tracking the start / end address of the field.
+ */
 public class Field {
 	TNFieldCharacter c;
 	
