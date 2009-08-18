@@ -101,6 +101,7 @@ public class TNCharacter extends TerminalCharacter {
 	}
 	
 	public void applyAttribute(short type, short value) {
+		System.out.println("Applying attribute: " + type + " value: " + value);
 		attributesSet = true;
 		switch (type) {
 			case ALL_ATTRIBS: {
@@ -136,6 +137,23 @@ public class TNCharacter extends TerminalCharacter {
 	
 	public boolean areAttributesSet() {
 		return attributesSet;
+	}
+	
+	public short getAttribute(short type) {
+		switch(type) {
+			case EXTENDED_HIGHLIGHT:
+				return extendedHighlight;
+			case FOREGROUND_COLOR:
+				return foreground;
+			case BACKGROUND_COLOR:
+				return background;
+			case CHARACTER_SET:
+				return characterSet;
+			case TRANSPARENCY:
+				return transparency;
+			default:
+				return 0;
+		}
 	}
 	
 	public void copyAttributes(TNCharacter src) {

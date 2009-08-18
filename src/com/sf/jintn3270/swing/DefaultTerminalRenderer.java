@@ -38,6 +38,13 @@ public class DefaultTerminalRenderer extends JComponent implements TerminalRende
 		stretchFont = true;
 	}
 	
+	protected Color getDefaultBackground() {
+		return Color.BLACK;
+	}
+	
+	protected Color getDefaultForeground() {
+		return Color.WHITE;
+	}
 	
 	/**
 	 * Paint the component to the given Graphics context!
@@ -49,8 +56,8 @@ public class DefaultTerminalRenderer extends JComponent implements TerminalRende
 		Rectangle2D charBound = g2d.getFontMetrics().getStringBounds("M", g2d);
 		LineMetrics lineMetrics = g2d.getFontMetrics().getLineMetrics("Mq", g2d);
 		
-		g2d.setBackground(Color.BLACK);
-		g2d.setColor(Color.WHITE);
+		g2d.setBackground(getDefaultBackground());
+		g2d.setColor(getDefaultForeground());
 		g2d.clearRect(0, 0, g2d.getClipBounds().width, g2d.getClipBounds().height);
 		
 		Point2D p = new Point2D.Float();

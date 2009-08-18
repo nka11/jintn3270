@@ -138,7 +138,7 @@ public class Partition {
 	 */
 	public void print(TNCharacter tc) {
 		// Apply the character attributes from the prior character to the 
-		// only being added to the display.
+		// one being added to the display.
 		if (!tc.areAttributesSet() && bufferAddress > 0) {
 			tc.copyAttributes(getCharacter(bufferAddress - 1));
 		}
