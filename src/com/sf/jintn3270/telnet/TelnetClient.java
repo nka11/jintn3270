@@ -429,8 +429,9 @@ public class TelnetClient extends Thread implements TelnetConstants {
 			connect();
 			in = new short[sock.getReceiveBufferSize()];
 		} catch (Exception ex) {
+			// TODO: Fire event to the model, so we can display something that lets the user know what happened.
 			ex.printStackTrace();
-			disconnected();
+			disconnect();
 		}
 		
  		while (sock != null && !sock.isClosed()) {
