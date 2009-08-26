@@ -4,7 +4,7 @@ import com.sf.jintn3270.tn3270.TerminalModel3278;
 
 public class EraseAllUnprotected extends Command {
 	public EraseAllUnprotected() {
-		super((short)0x6f);
+		super(new short[] {0x6f, 0x0f});
 	}
 	
 	protected int preform(TerminalModel3278 model, short[] b, int off, int len) {

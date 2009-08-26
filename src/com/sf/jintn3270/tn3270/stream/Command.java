@@ -3,13 +3,13 @@ package com.sf.jintn3270.tn3270.stream;
 import com.sf.jintn3270.tn3270.TerminalModel3278;
 
 public abstract class Command {
-	private short code;
+	private short[] code;
 	
-	protected Command(short code) {
+	protected Command(short[] code) {
 		this.code = code;
 	}
 	
-	public short getCode() {
+	public short[] getCode() {
 		return code;
 	}
 	

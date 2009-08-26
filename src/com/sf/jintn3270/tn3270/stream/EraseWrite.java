@@ -8,7 +8,7 @@ import com.sf.jintn3270.tn3270.Window;
  */
 public class EraseWrite extends Command {
 	public EraseWrite() {
-		super((short)0xf5);
+		super(new short[] {0xf5, 0x05});
 	}
 	
 	/**

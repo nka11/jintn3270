@@ -27,7 +27,7 @@ public class Write extends Command {
 	private static final int GRAPHIC_ESCAPE = 0x08;
 	
 	public Write() {
-		super((short)0xf1);
+		super(new short[] {0xf1, 0x01});
 	}
 	
 	protected int preform(TerminalModel3278 model, short[] b, int off, int len) {

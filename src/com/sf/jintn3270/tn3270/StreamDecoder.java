@@ -41,7 +41,9 @@ public class StreamDecoder extends UByteOutputStream {
 	}
 	
 	private void addCommand(Command c) {
-		commandMap.put(c.getCode(), c);
+		for (short s : c.getCode()) {
+			commandMap.put(s, c);
+		}
 	}
 	
 	public void close() throws IOException {

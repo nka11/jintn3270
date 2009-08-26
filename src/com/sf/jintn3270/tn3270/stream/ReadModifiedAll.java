@@ -4,7 +4,7 @@ import com.sf.jintn3270.tn3270.TerminalModel3278;
 
 public class ReadModifiedAll extends Command {
 	public ReadModifiedAll() {
-		super((short)0x6e);
+		super(new short[] {0x6e, 0x0e});
 	}
 	
 	protected int preform(TerminalModel3278 model, short[] b, int off, int len) {
